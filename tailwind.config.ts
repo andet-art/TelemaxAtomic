@@ -1,5 +1,6 @@
-/** @type {import('tailwindcss').Config} */
-module.exports = {
+import type { Config } from "tailwindcss";
+
+export default {
 	darkMode: ["class"],
 	content: [
 		"./pages/**/*.{ts,tsx}",
@@ -25,7 +26,8 @@ module.exports = {
 				foreground: 'hsl(var(--foreground))',
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',
-					foreground: 'hsl(var(--primary-foreground))'
+					foreground: 'hsl(var(--primary-foreground))',
+					glow: 'hsl(var(--primary-glow))'
 				},
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
@@ -60,7 +62,16 @@ module.exports = {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+				amber: {
+					rich: 'hsl(var(--amber-rich))',
+					deep: 'hsl(var(--amber-deep))'
+				},
+				gold: {
+					shine: 'hsl(var(--gold-shine))'
+				},
+				copper: 'hsl(var(--copper))',
+				bronze: 'hsl(var(--bronze))'
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -83,29 +94,13 @@ module.exports = {
 					to: {
 						height: '0'
 					}
-				},
-				'float': {
-					'0%, 100%': { transform: 'translateY(0px) rotate(0deg)', opacity: '0.6' },
-					'50%': { transform: 'translateY(-20px) rotate(3deg)', opacity: '0.8' }
-				},
-				'float-delayed': {
-					'0%, 100%': { transform: 'translateY(0px) rotate(0deg)', opacity: '0.4' },
-					'50%': { transform: 'translateY(-15px) rotate(-2deg)', opacity: '0.7' }
-				},
-				'shimmer': {
-					'0%': { transform: 'translateX(-100%)', opacity: '0' },
-					'50%': { opacity: '1' },
-					'100%': { transform: 'translateX(200%)', opacity: '0' }
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
-				'float': 'float 10s ease-in-out infinite',
-				'float-delayed': 'float-delayed 12s ease-in-out infinite',
-				'shimmer': 'shimmer 4s linear infinite'
+				'accordion-up': 'accordion-up 0.2s ease-out'
 			}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
-};
+} satisfies Config;

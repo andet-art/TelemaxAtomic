@@ -9,7 +9,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className="pt-20">
+      <main className="relative -mt-2">
         {children}
       </main>
     </div>

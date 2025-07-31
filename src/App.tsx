@@ -32,18 +32,16 @@ function App() {
           <Sonner />
           <LanguageProvider>
             <AuthProvider>
-              <MainLayout>
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/contact" element={<Contact />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/signin" element={<SignIn />} />
-                  <Route path="/join" element={<Join />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </MainLayout>
+              <Routes>
+                <Route path="/" element={<MainLayout><Home /></MainLayout>} />
+                <Route path="/about" element={<MainLayout><About /></MainLayout>} />
+                <Route path="/orders" element={<MainLayout><Orders /></MainLayout>} />
+                <Route path="/contact" element={<MainLayout><Contact /></MainLayout>} />
+                <Route path="/profile" element={<MainLayout><Profile /></MainLayout>} />
+                <Route path="/signin" element={<MainLayout><SignIn /></MainLayout>} />
+                <Route path="/join" element={<MainLayout><Join /></MainLayout>} />
+                <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
+              </Routes>
             </AuthProvider>
           </LanguageProvider>
         </TooltipProvider>
@@ -51,5 +49,6 @@ function App() {
     </QueryClientProvider>
   );
 }
+
 
 export default App;
