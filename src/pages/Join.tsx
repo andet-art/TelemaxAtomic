@@ -54,7 +54,7 @@ const Join = () => {
   setIsSubmitting(true);
 
   try {
-    const res = await axios.post('http://134.122.71.254/api/users/signup', {
+    const res = await axios.post('http://134.122.71.254:4000/api/users/signup', {
       first_name: formData.firstName,
       last_name: formData.lastName,
       email: formData.email,

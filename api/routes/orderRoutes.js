@@ -5,12 +5,17 @@ import {
   getOrder,
   deleteOrder
 } from '../controllers/orderController.js';
+import { verifyToken } from '../middleware/verifyToken.js';
+import { isAdmin } from '../middleware/isAdmin.js';
 
 const router = express.Router();
 
-router.post('/', createOrder);
-router.get('/', getOrders);
-router.get('/:id', getOrder);
-router.delete('/:id', deleteOrder);
+// 🛒 Create order (must be logged in)
+router.post('/', verifyToken, createOrder);
+
+// 🔐 Admin-only access to all orders
+router.get('/', verifyToken, isAdmin, getOrders);
+router.get('/:id', verifyToken, isAdmin, getOrder);
+router.delete('/:id', verifyToken, isAdmin, deleteOrder);
 
 export default router;

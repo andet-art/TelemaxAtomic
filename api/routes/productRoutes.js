@@ -7,12 +7,18 @@ import {
   deleteProduct
 } from '../controllers/productController.js';
 
+import { verifyToken } from '../middleware/verifyToken.js';
+import { isAdmin } from '../middleware/isAdmin.js';
+
 const router = express.Router();
 
+// Public routes
 router.get('/', getProducts);
 router.get('/:id', getProduct);
-router.post('/', createProduct);
-router.put('/:id', updateProduct);
-router.delete('/:id', deleteProduct);
+
+// Admin routes (protected)
+router.post('/', verifyToken, isAdmin, createProduct);
+router.put('/:id', verifyToken, isAdmin, updateProduct);
+router.delete('/:id', verifyToken, isAdmin, deleteProduct);
 
 export default router;

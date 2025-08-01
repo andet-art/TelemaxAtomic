@@ -1,11 +1,41 @@
-The remaining files for:
+import db from '../config/db.js';
 
-Products: productModel.js, productController.js, productRoutes.js
+/**
+ * Create a new product.
+ * @param {Object} product - Product details
+ */
+export const createProduct = (product) => {
+  return db.query('INSERT INTO products SET ?', [product]);
+};
 
-Orders: orderModel.js, orderController.js, orderRoutes.js
+/**
+ * Get all products.
+ */
+export const getAllProducts = () => {
+  return db.query('SELECT * FROM products ORDER BY created_at DESC');
+};
 
-Stats: statsController.js, statsRoutes.js
+/**
+ * Get product by ID.
+ * @param {number} id - Product ID
+ */
+export const getProductById = (id) => {
+  return db.query('SELECT * FROM products WHERE id = ?', [id]);
+};
 
-will be generated next. Let me know if you want me to proceed with those immediately.
+/**
+ * Update product by ID.
+ * @param {number} id - Product ID
+ * @param {Object} product - Updated product data
+ */
+export const updateProduct = (id, product) => {
+  return db.query('UPDATE products SET ? WHERE id = ?', [product, id]);
+};
 
-✅ Also let me know what endpoints each should have (e.g., POST /orders, GET /products, etc.).
+/**
+ * Delete product by ID.
+ * @param {number} id - Product ID
+ */
+export const deleteProduct = (id) => {
+  return db.query('DELETE FROM products WHERE id = ?', [id]);
+};

@@ -2,6 +2,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
@@ -14,13 +16,18 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// ✅ Allowed origins (local dev + production IP)
+// Setup for __dirname in ES Modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// ✅ Allowed origins
 const allowedOrigins = [
   'http://localhost:8080',
   'http://134.122.71.254',
   'http://134.122.71.254:4000',
 ];
 
+// ✅ CORS middleware
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -32,17 +39,22 @@ app.use(cors({
   credentials: true,
 }));
 
+// ✅ JSON body parser
 app.use(express.json());
 
-// ✅ Your API routes
+// ✅ Static file serving for uploaded files
+app.use('/uploads', express.static(path.join(__dirname, '..', 'public/uploads')));
+
+// ✅ Routes
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/stats', statsRoutes);
 
-// ✅ Centralized error handler
+// ✅ Error handling middleware
 app.use(errorHandler);
 
+// ✅ Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://134.122.71.254:${PORT}`);
 });
