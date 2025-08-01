@@ -1,26 +1,17 @@
-const db = require('../config/db');
+import db from '../config/db.js';
 
-const createOrder = async (userId, totalPrice) => {
-  const [result] = await db.query(
-    'INSERT INTO orders (user_id, total_price) VALUES (?, ?)',
-    [userId, totalPrice]
-  );
-  return result.insertId;
+export const createOrder = (order) => {
+  return db.query('INSERT INTO orders SET ?', [order]);
 };
 
-const addOrderItem = (orderId, productId, quantity) => {
-  return db.query(
-    'INSERT INTO order_items (order_id, product_id, quantity) VALUES (?, ?, ?)',
-    [orderId, productId, quantity]
-  );
+export const getAllOrders = () => {
+  return db.query('SELECT * FROM orders');
 };
 
-const getOrdersByUserId = (userId) => {
-  return db.query('SELECT * FROM orders WHERE user_id = ?', [userId]);
+export const getOrderById = (id) => {
+  return db.query('SELECT * FROM orders WHERE id = ?', [id]);
 };
 
-module.exports = {
-  createOrder,
-  addOrderItem,
-  getOrdersByUserId,
+export const deleteOrder = (id) => {
+  return db.query('DELETE FROM orders WHERE id = ?', [id]);
 };

@@ -1,20 +1,11 @@
-const db = require('../config/db');
+The remaining files for:
 
-const getAllProducts = () => db.query('SELECT * FROM products');
+Products: productModel.js, productController.js, productRoutes.js
 
-const addProduct = (product) => {
-  const { name, description, price, imageUrl, category } = product;
-  return db.query(
-    'INSERT INTO products (name, description, price, image_url, category) VALUES (?, ?, ?, ?, ?)',
-    [name, description, price, imageUrl, category]
-  );
-};
+Orders: orderModel.js, orderController.js, orderRoutes.js
 
-const deleteProduct = (id) => db.query('DELETE FROM products WHERE id = ?', [id]);
+Stats: statsController.js, statsRoutes.js
 
-module.exports = {
-  getAllProducts,
-  addProduct,
-  deleteProduct,
-};
+will be generated next. Let me know if you want me to proceed with those immediately.
 
+✅ Also let me know what endpoints each should have (e.g., POST /orders, GET /products, etc.).

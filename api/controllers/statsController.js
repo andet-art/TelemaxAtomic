@@ -1,14 +1,17 @@
-const db = require('../config/db');
+import db from '../config/db.js';
 
-exports.getStats = async (req, res) => {
+export const getStats = async (req, res, next) => {
   try {
-    const [[{ totalUsers }]] = await db.query('SELECT COUNT(*) AS totalUsers FROM users');
-    const [[{ totalOrders }]] = await db.query('SELECT COUNT(*) AS totalOrders FROM orders');
-    const [[{ totalRevenue }]] = await db.query('SELECT SUM(total_price) AS totalRevenue FROM orders');
+    const [[userCount]] = await db.query('SELECT COUNT(*) AS users FROM users');
+    const [[productCount]] = await db.query('SELECT COUNT(*) AS products FROM products');
+    const [[orderCount]] = await db.query('SELECT COUNT(*) AS orders FROM orders');
 
-    res.json({ totalUsers, totalOrders, totalRevenue });
+    res.json({
+      users: userCount.users,
+      products: productCount.products,
+      orders: orderCount.orders
+    });
   } catch (err) {
-    console.error('Stats error:', err);
-    res.status(500).json({ message: 'Error retrieving stats' });
+    next(err);
   }
 };

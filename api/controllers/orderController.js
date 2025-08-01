@@ -1,36 +1,38 @@
-const db = require('../config/db');
+import * as Order from '../models/orderModel.js';
 
-exports.createOrder = async (req, res) => {
-  const { userId, items, totalPrice } = req.body;
-
+export const createOrder = async (req, res, next) => {
   try {
-    const [orderResult] = await db.query(
-      'INSERT INTO orders (user_id, total_price) VALUES (?, ?)',
-      [userId, totalPrice]
-    );
-
-    const orderId = orderResult.insertId;
-
-    for (const item of items) {
-      await db.query(
-        'INSERT INTO order_items (order_id, product_id, quantity) VALUES (?, ?, ?)',
-        [orderId, item.productId, item.quantity]
-      );
-    }
-
-    res.status(201).json({ message: 'Order created', orderId });
-  } catch (error) {
-    console.error('Create order error:', error);
-    res.status(500).json({ message: 'Failed to create order' });
+    await Order.createOrder(req.body);
+    res.status(201).json({ message: 'Order placed successfully' });
+  } catch (err) {
+    next(err);
   }
 };
 
-exports.getOrdersByUser = async (req, res) => {
-  const userId = req.user.id;
+export const getOrders = async (req, res, next) => {
   try {
-    const [orders] = await db.query('SELECT * FROM orders WHERE user_id = ?', [userId]);
-    res.json(orders);
+    const [rows] = await Order.getAllOrders();
+    res.json(rows);
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching orders' });
+    next(err);
+  }
+};
+
+export const getOrder = async (req, res, next) => {
+  try {
+    const [rows] = await Order.getOrderById(req.params.id);
+    if (!rows.length) return res.status(404).json({ message: 'Order not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteOrder = async (req, res, next) => {
+  try {
+    await Order.deleteOrder(req.params.id);
+    res.json({ message: 'Order deleted' });
+  } catch (err) {
+    next(err);
   }
 };

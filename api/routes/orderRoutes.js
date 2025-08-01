@@ -1,9 +1,16 @@
-const express = require('express');
+import express from 'express';
+import {
+  createOrder,
+  getOrders,
+  getOrder,
+  deleteOrder
+} from '../controllers/orderController.js';
+
 const router = express.Router();
-const { createOrder, getOrdersByUser } = require('../controllers/orderController');
-const verifyToken = require('../middleware/verifyToken');
 
-router.post('/', verifyToken, createOrder);
-router.get('/my-orders', verifyToken, getOrdersByUser);
+router.post('/', createOrder);
+router.get('/', getOrders);
+router.get('/:id', getOrder);
+router.delete('/:id', deleteOrder);
 
-module.exports = router;
+export default router;

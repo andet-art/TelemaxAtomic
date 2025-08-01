@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import { Link } from 'react-router-dom';
 
+import axios from 'axios';
+
 const Join = () => {
   const [formData, setFormData] = useState({
     firstName: '',
@@ -47,18 +49,28 @@ const Join = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    setIsSubmitting(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      alert('Account created successfully!');
-    } catch (error) {
-      alert('Failed to create account. Try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  e.preventDefault();
+  if (!validateForm()) return;
+  setIsSubmitting(true);
+
+  try {
+    const res = await axios.post('http://134.122.71.254/api/users/signup', {
+      first_name: formData.firstName,
+      last_name: formData.lastName,
+      email: formData.email,
+      password: formData.password,
+    });
+
+    alert('Account created successfully!');
+    // optionally: redirect to signin page
+    // navigate("/signin");
+  } catch (error) {
+    console.error(error);
+    alert(error?.response?.data?.message || 'Failed to create account. Try again.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-background text-foreground">

@@ -1,33 +1,47 @@
-const db = require('../config/db');
+import * as Product from '../models/productModel.js';
 
-exports.getAllProducts = async (req, res) => {
+export const getProducts = async (req, res, next) => {
   try {
-    const [products] = await db.query('SELECT * FROM products');
-    res.json(products);
+    const [rows] = await Product.getAllProducts();
+    res.json(rows);
   } catch (err) {
-    res.status(500).json({ message: 'Error fetching products' });
+    next(err);
   }
 };
 
-exports.addProduct = async (req, res) => {
-  const { name, description, price, imageUrl, category } = req.body;
+export const getProduct = async (req, res, next) => {
   try {
-    await db.query(
-      'INSERT INTO products (name, description, price, image_url, category) VALUES (?, ?, ?, ?, ?)',
-      [name, description, price, imageUrl, category]
-    );
-    res.status(201).json({ message: 'Product added' });
+    const [rows] = await Product.getProductById(req.params.id);
+    if (!rows.length) return res.status(404).json({ message: 'Product not found' });
+    res.json(rows[0]);
   } catch (err) {
-    res.status(500).json({ message: 'Failed to add product' });
+    next(err);
   }
 };
 
-exports.deleteProduct = async (req, res) => {
-  const { id } = req.params;
+export const createProduct = async (req, res, next) => {
   try {
-    await db.query('DELETE FROM products WHERE id = ?', [id]);
+    await Product.createProduct(req.body);
+    res.status(201).json({ message: 'Product created' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const updateProduct = async (req, res, next) => {
+  try {
+    await Product.updateProduct(req.params.id, req.body);
+    res.json({ message: 'Product updated' });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const deleteProduct = async (req, res, next) => {
+  try {
+    await Product.deleteProduct(req.params.id);
     res.json({ message: 'Product deleted' });
   } catch (err) {
-    res.status(500).json({ message: 'Failed to delete product' });
+    next(err);
   }
 };
