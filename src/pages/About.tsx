@@ -2,6 +2,7 @@ import React from 'react';
 import { Sparkles, Crown, Flame, Shield, Zap, Users, Award, Truck, Play, ArrowRight, Gift } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
 const About: React.FC = () => {
   return (
@@ -152,6 +153,7 @@ const About: React.FC = () => {
           </div>
         </div>
       </section>
+      <Footer />
     </div>
   );
 };

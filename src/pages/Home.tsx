@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+
 
 // Import images
 import heroBackground from '@/assets/hero-background.jpg';
@@ -421,8 +423,9 @@ const Index = () => {
               </Button>
             </div>
           </div>
-        </div>
-      </section>
+        </div>        
+      </section> 
+      <Footer />     
     </div>
   );
 };
