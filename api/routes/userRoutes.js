@@ -1,16 +1,9 @@
 import express from 'express';
-import { register, login } from '../controllers/authController.js';
-import { getProfile, updateProfile } from '../controllers/userController.js';
-import { verifyToken } from '../middleware/verifyToken.js';
+import { signup, signin } from '../controllers/userController.js';
 
 const router = express.Router();
 
-// 🔐 Auth
-router.post('/register', register);
-router.post('/login', login);
-
-// 👤 User Profile (protected)
-router.get('/profile', verifyToken, getProfile);
-router.put('/profile', verifyToken, updateProfile);
+router.post('/signup', signup);
+router.post('/signin', signin);
 
 export default router;

@@ -1,38 +1,32 @@
-import db from '../config/db.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import config from '../config/config.js';
+import { createUser, findUserByEmail } from '../models/userModel.js';
 
-export const getProfile = async (req, res) => {
-  try {
-    const [rows] = await db.query(
-      'SELECT id, first_name, last_name, email, role FROM users WHERE id = ?',
-      [req.user.id]
-    );
+export const signup = async (req, res) => {
+  const { name, email, password } = req.body;
 
-    if (!rows.length) {
-      return res.status(404).json({ message: 'User not found' });
-    }
+  const existing = await findUserByEmail(email);
+  if (existing) return res.status(409).json({ message: 'User already exists' });
 
-    res.json(rows[0]);
-  } catch (err) {
-    console.error('Error fetching profile:', err.message);
-    res.status(500).json({ message: 'Error fetching user profile' });
-  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const userId = await createUser(name, email, hashedPassword);
+
+  const token = jwt.sign({ id: userId, email }, config.jwtSecret, { expiresIn: '7d' });
+
+  res.status(201).json({ token });
 };
 
-export const updateProfile = async (req, res) => {
-  const { firstName, lastName } = req.body;
+export const signin = async (req, res) => {
+  const { email, password } = req.body;
 
-  if (!firstName || !lastName) {
-    return res.status(400).json({ message: 'First and last name are required' });
-  }
+  const user = await findUserByEmail(email);
+  if (!user) return res.status(404).json({ message: 'User not found' });
 
-  try {
-    await db.query(
-      'UPDATE users SET first_name = ?, last_name = ? WHERE id = ?',
-      [firstName, lastName, req.user.id]
-    );
-    res.json({ message: 'Profile updated' });
-  } catch (err) {
-    console.error('Error updating profile:', err.message);
-    res.status(500).json({ message: 'Error updating profile' });
-  }
+  const match = await bcrypt.compare(password, user.password);
+  if (!match) return res.status(401).json({ message: 'Invalid credentials' });
+
+  const token = jwt.sign({ id: user.id, email }, config.jwtSecret, { expiresIn: '7d' });
+
+  res.json({ token });
 };
