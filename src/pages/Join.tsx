@@ -1,25 +1,31 @@
 import React, { useState } from 'react';
-import { Sparkles, UserPlus, Lock, Mail, ArrowRight } from 'lucide-react';
+import { Sparkles, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const Join = () => {
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
+    name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    agreeToTerms: false
+    phone: '',
+    address: '',
+    city: '',
+    country: '',
+    postal_code: '',
+    avatar_url: '',
+    agreeToTerms: false,
   });
 
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<any>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+  const API = import.meta.env.VITE_API_URL || 'http://134.122.71.254:4000';
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -29,9 +35,8 @@ const Join = () => {
   };
 
   const validateForm = () => {
-    const newErrors = {};
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
+    const newErrors: any = {};
+    if (!formData.name.trim()) newErrors.name = 'Name is required';
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
@@ -44,40 +49,50 @@ const Join = () => {
       newErrors.confirmPassword = 'Passwords do not match';
     }
     if (!formData.agreeToTerms) newErrors.agreeToTerms = 'You must agree to the terms';
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
-  const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!validateForm()) return;
-  setIsSubmitting(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const formErrors = validateForm();
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
+      return;
+    }
 
-  try {
-    const res = await axios.post('http://134.122.71.254:4000/api/users/signup', {
-      first_name: formData.firstName,
-      last_name: formData.lastName,
-      email: formData.email,
-      password: formData.password,
-    });
+    setIsSubmitting(true);
+    try {
+      const res = await axios.post(`${API}/api/users/signup`, {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        country: formData.country,
+        postal_code: formData.postal_code,
+        avatar_url: formData.avatar_url
+      });
 
-    alert('Account created successfully!');
-    // optionally: redirect to signin page
-    // navigate("/signin");
-  } catch (error) {
-    console.error(error);
-    alert(error?.response?.data?.message || 'Failed to create account. Try again.');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+        alert('✅ Account created!');
+        navigate('/profile');
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Signup failed.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navbar />
 
       <section className="flex flex-col items-center justify-center px-4 py-24">
-        <div className="max-w-xl w-full glass-card p-10 rounded-2xl shadow-lg">
+        <div className="max-w-2xl w-full glass-card p-10 rounded-2xl shadow-lg">
           <div className="text-center space-y-3 mb-8">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/20">
               <Sparkles className="w-5 h-5 text-primary animate-pulse" />
@@ -92,27 +107,79 @@ const Join = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="text-sm mb-1 block">First Name</label>
+                <label className="text-sm mb-1 block">Full Name</label>
                 <input
-                  name="firstName"
-                  value={formData.firstName}
+                  name="name"
+                  value={formData.name}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary"
-                  placeholder="First name"
+                  placeholder="John Doe"
                 />
-                {errors.firstName && <p className="text-sm text-red-500 mt-1">{errors.firstName}</p>}
+                {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
               </div>
               <div>
-                <label className="text-sm mb-1 block">Last Name</label>
+                <label className="text-sm mb-1 block">Phone</label>
                 <input
-                  name="lastName"
-                  value={formData.lastName}
+                  name="phone"
+                  value={formData.phone}
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary"
-                  placeholder="Last name"
+                  placeholder="+38970xxxxxx"
                 />
-                {errors.lastName && <p className="text-sm text-red-500 mt-1">{errors.lastName}</p>}
               </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="text-sm mb-1 block">Address</label>
+                <input
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-sm mb-1 block">City</label>
+                <input
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="text-sm mb-1 block">Country</label>
+                <input
+                  name="country"
+                  value={formData.country}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <div>
+                <label className="text-sm mb-1 block">Postal Code</label>
+                <input
+                  name="postal_code"
+                  value={formData.postal_code}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm mb-1 block">Avatar URL</label>
+              <input
+                name="avatar_url"
+                value={formData.avatar_url}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 rounded-lg border border-border focus:ring-2 focus:ring-primary"
+                placeholder="https://i.pravatar.cc/150?u=telemax"
+              />
             </div>
 
             <div>

@@ -10,6 +10,10 @@ import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
 
+// 👇 New imports for categories & models
+import categoryRoutes from './routes/categoryRoutes.js';
+import modelRoutes    from './routes/modelRoutes.js';
+
 import errorHandler from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -22,14 +26,15 @@ const __dirname = path.dirname(__filename);
 
 // ✅ Allowed origins
 const allowedOrigins = [
-  'http://localhost:8080',
+  'http://localhost:3000',       // React dev server
+  'http://localhost:8080',       // if you use a different port
   'http://134.122.71.254',
   'http://134.122.71.254:4000',
 ];
 
 // ✅ CORS middleware
 app.use(cors({
-  origin: function (origin, callback) {
+  origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -43,13 +48,18 @@ app.use(cors({
 app.use(express.json());
 
 // ✅ Static file serving for uploaded files
-app.use('/uploads', express.static(path.join(__dirname, '..', 'public/uploads')));
+app.use(
+  '/uploads',
+  express.static(path.join(__dirname, '..', 'public/uploads'))
+);
 
 // ✅ Routes
-app.use('/api/users', userRoutes);
+app.use('/api/users',    userRoutes);
+app.use('/api/categories', categoryRoutes);  // ← categories endpoints
+app.use('/api/models',     modelRoutes);     // ← models endpoints
 app.use('/api/products', productRoutes);
-app.use('/api/orders', orderRoutes);
-app.use('/api/stats', statsRoutes);
+app.use('/api/orders',   orderRoutes);
+app.use('/api/stats',    statsRoutes);
 
 // ✅ Error handling middleware
 app.use(errorHandler);
@@ -58,4 +68,3 @@ app.use(errorHandler);
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server running on http://134.122.71.254:${PORT}`);
 });
-
