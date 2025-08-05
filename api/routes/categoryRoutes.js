@@ -1,6 +1,6 @@
 // routes/categoryRoutes.js
 import express from 'express';
-import db from '../config/db';
+import db from '../config/db.js';
 const router = express.Router();
 
 router.get('/', async (req, res, next) => {
