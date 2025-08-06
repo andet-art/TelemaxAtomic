@@ -1,17 +1,18 @@
+// src/pages/Signin.tsx
 import React, { useState } from 'react';
+import axios from 'axios';
 import { Eye, EyeOff, LogIn, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import { useNavigate } from 'react-router-dom';
 
-const Signin = () => {
+const Signin: React.FC = () => {
   const navigate = useNavigate();
-
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [email, setEmail]           = useState<string>('');
+  const [password, setPassword]     = useState<string>('');
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [error, setError]           = useState<string>('');
+  const [loading, setLoading]       = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,14 +20,20 @@ const Signin = () => {
     setLoading(true);
 
     try {
-      // Replace this with your API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const base = import.meta.env.VITE_API_URL;
+      const res = await axios.post(
+        `${base}/api/users/login`,       // ← updated path
+        { email, password },
+        { headers: { 'Content-Type': 'application/json' } }
+      );
 
-      // Simulate login success
-      localStorage.setItem('token', 'demo-token');
+      localStorage.setItem('token', res.data.token);
       navigate('/');
-    } catch (err) {
-      setError('Invalid email or password. Please try again.');
+    } catch (err: any) {
+      const msg =
+        err.response?.data?.message ||
+        'Login failed. Please check your credentials and try again.';
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -50,8 +57,11 @@ const Signin = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Email */}
             <div>
-              <label className="block text-sm font-medium mb-1">Email Address</label>
+              <label className="block text-sm font-medium mb-1">
+                Email Address
+              </label>
               <input
                 type="email"
                 name="email"
@@ -63,8 +73,11 @@ const Signin = () => {
               />
             </div>
 
+            {/* Password */}
             <div>
-              <label className="block text-sm font-medium mb-1">Password</label>
+              <label className="block text-sm font-medium mb-1">
+                Password
+              </label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -77,34 +90,55 @@ const Signin = () => {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-3 text-muted-foreground"
+                  aria-label="Toggle password visibility"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
 
+            {/* Remember & Forgot */}
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" className="form-checkbox rounded border-border text-primary" />
+                <input
+                  type="checkbox"
+                  className="form-checkbox rounded border-border text-primary"
+                />
                 Remember me
               </label>
-              <a href="/forgot-password" className="text-sm text-primary hover:underline">
+              <a
+                href="/forgot-password"
+                className="text-sm text-primary hover:underline"
+              >
                 Forgot password?
               </a>
             </div>
 
+            {/* Error */}
             {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
 
-            <Button type="submit" className="w-full py-3 text-lg luxury-gradient font-bold">
+            {/* Submit */}
+            <Button
+              type="submit"
+              className="w-full py-3 text-lg luxury-gradient font-bold"
+              disabled={loading}
+            >
               {loading ? 'Signing In...' : 'Sign In'}
               <LogIn className="w-5 h-5 ml-2" />
             </Button>
 
+            {/* Signup link */}
             <div className="text-center text-sm text-muted-foreground">
               Don’t have an account?{' '}
-              <a href="/signup" className="text-primary hover:underline">Create one</a>
+              <a href="/signup" className="text-primary hover:underline">
+                Create one
+              </a>
             </div>
           </form>
         </div>

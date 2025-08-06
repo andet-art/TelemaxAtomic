@@ -18,6 +18,7 @@ import Profile from "./pages/Profile";
 import SignIn from "./pages/SignIn";
 import Join from "./pages/Join";
 import NotFound from "./pages/NotFound";
+import Cart from "./pages/Cart";
 
 import { Routes, Route } from "react-router-dom";
 
@@ -41,6 +42,7 @@ function App() {
                 <Route path="/signin" element={<MainLayout><SignIn /></MainLayout>} />
                 <Route path="/join" element={<MainLayout><Join /></MainLayout>} />
                 <Route path="*" element={<MainLayout><NotFound /></MainLayout>} />
+                <Route path="/cart" element={<Cart />} />
               </Routes>
             </AuthProvider>
           </LanguageProvider>
