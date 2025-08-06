@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Eye, EyeOff, LogIn, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Navbar from '@/components/Navbar';
 import { useNavigate } from 'react-router-dom';
 
 const Signin: React.FC = () => {
@@ -22,7 +21,7 @@ const Signin: React.FC = () => {
     try {
       const base = import.meta.env.VITE_API_URL;
       const res = await axios.post(
-        `${base}/api/users/signin`,       // ← use /signin, not /login
+        `${base}/api/users/signin`,
         { email, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -41,8 +40,6 @@ const Signin: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <Navbar />
-
       <section className="flex flex-col items-center justify-center px-4 py-24">
         <div className="max-w-md w-full glass-card p-8 rounded-2xl shadow-lg">
           <div className="text-center space-y-3 mb-8">
@@ -94,11 +91,7 @@ const Signin: React.FC = () => {
                   className="absolute right-3 top-3 text-muted-foreground"
                   aria-label="Toggle password visibility"
                 >
-                  {showPassword ? (
-                    <EyeOff className="w-5 h-5" />
-                  ) : (
-                    <Eye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                 </button>
               </div>
             </div>
@@ -112,10 +105,7 @@ const Signin: React.FC = () => {
                 />
                 Remember me
               </label>
-              <a
-                href="/forgot-password"
-                className="text-sm text-primary hover:underline"
-              >
+              <a href="/forgot-password" className="text-sm text-primary hover:underline">
                 Forgot password?
               </a>
             </div>

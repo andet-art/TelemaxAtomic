@@ -33,10 +33,39 @@ const useLang = () => {
   return { lang, toggleLanguage, t };
 };
 
+// Enhanced useAuth hook with proper authentication state management
 const useAuth = () => {
   const [user, setUser] = useState(null);
-  const logout = () => setUser(null);
-  return { user, logout };
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // Check for existing authentication on component mount
+  useEffect(() => {
+    // Check if user is logged in (replace with your actual auth logic)
+    const storedUser = localStorage.getItem('user');
+    const authToken = localStorage.getItem('authToken');
+    
+    if (storedUser && authToken) {
+      const userData = JSON.parse(storedUser);
+      setUser(userData);
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const login = (userData, token) => {
+    setUser(userData);
+    setIsAuthenticated(true);
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('authToken', token);
+  };
+
+  const logout = () => {
+    setUser(null);
+    setIsAuthenticated(false);
+    localStorage.removeItem('user');
+    localStorage.removeItem('authToken');
+  };
+
+  return { user, isAuthenticated, login, logout };
 };
 
 // Optimized floating orb with reduced intensity
@@ -86,7 +115,7 @@ const FloatingIndicator = ({ activeIndex, links }: { activeIndex: number; links:
 
 const Navbar = () => {
   const { lang, toggleLanguage, t } = useLang();
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [showNavbar, setShowNavbar] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -145,7 +174,7 @@ const Navbar = () => {
 
   const handleLogout = () => {
     logout();
-    navigateToPage('/signin');
+    navigate('/signin');
   };
 
   const navigateToPage = (to: string) => {
@@ -158,11 +187,13 @@ const Navbar = () => {
   const flags = { en: '🇺🇸', mk: '🇲🇰', al: '🇦🇱' };
   const labels = { en: 'EN', mk: 'МК', al: 'AL' };
 
+  // Update links to include profile when authenticated
   const links = [
     { to: '/', label: t('home'), icon: Home },
     { to: '/about', label: t('about'), icon: Info },
     { to: '/orders', label: t('orders'), icon: ShoppingBag },
     { to: '/contact', label: t('contact'), icon: MessageCircle },
+    ...(isAuthenticated ? [{ to: '/profile', label: t('profile'), icon: User }] : [])
   ];
 
   const activeIndex = links.findIndex(link => link.to === location.pathname);
@@ -380,34 +411,30 @@ const Navbar = () => {
               </div>
             </div>
 
-            {user ? (
-              <>
+            {/* Conditional rendering based on authentication */}
+            {isAuthenticated ? (
+              // Authenticated user actions - Show user profile dropdown
+              <div className="relative">
                 <Button 
-                  variant="outline" 
-                  onClick={() => navigateToPage('/profile')} 
+                  variant="ghost"
+                  onClick={() => navigateToPage('/profile')}
                   className={cn(
-                    "gap-2 bg-slate-800/35 hover:bg-slate-700/45 border-slate-600/35 hover:border-slate-500/45 text-slate-200 hover:text-white transition-all duration-300 backdrop-blur-2xl px-3 lg:px-5 xl:px-6 py-1.5 lg:py-2 rounded-xl text-sm font-semibold group relative overflow-hidden",
+                    "gap-2 bg-slate-800/35 hover:bg-slate-700/45 border border-slate-600/35 hover:border-slate-500/45 text-slate-200 hover:text-white transition-all duration-300 backdrop-blur-2xl px-3 lg:px-5 xl:px-6 py-1.5 lg:py-2 rounded-xl text-sm font-semibold group relative overflow-hidden",
                     showNavbar ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
                   )}
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/8 to-pink-500/5 opacity-0 group-hover:opacity-100 transition-all duration-300" />
                   <User className="w-4 h-4 lg:w-4.5 lg:h-4.5 relative z-10 transition-all duration-300 group-hover:scale-110" />
                   <span className="hidden lg:inline relative z-10">{t('profile')}</span>
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  onClick={handleLogout} 
-                  className={cn(
-                    "gap-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 border border-red-800/25 hover:border-red-700/40 transition-all duration-300 backdrop-blur-2xl px-3 lg:px-5 xl:px-6 py-1.5 lg:py-2 rounded-xl text-sm font-semibold group relative overflow-hidden",
-                    showNavbar ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"
+                  {user?.name && (
+                    <span className="hidden xl:inline text-xs text-slate-400 ml-1">
+                      {user.name.split(' ')[0]}
+                    </span>
                   )}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-red-400/8 to-red-500/5 opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                  <LogOut className="w-4 h-4 lg:w-4.5 lg:h-4.5 relative z-10 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
-                  <span className="hidden lg:inline relative z-10">{t('logout')}</span>
                 </Button>
-              </>
+              </div>
             ) : (
+              // Unauthenticated user actions (Sign In & Join)
               <>
                 <Button 
                   variant="outline"
@@ -522,26 +549,24 @@ const Navbar = () => {
               <span>{flags[lang]} {labels[lang]}</span>
             </Button>
 
-            {user ? (
-              <>
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigateToPage('/profile')} 
-                  className="w-full h-11 sm:h-12 bg-slate-800/35 border-slate-600/35 text-slate-200 hover:text-white text-base font-semibold rounded-xl gap-3"
-                >
-                  <User className="w-4.5 h-4.5" />
-                  {t('profile')}
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  onClick={handleLogout} 
-                  className="w-full h-11 sm:h-12 text-red-400 hover:text-red-300 hover:bg-red-900/20 border border-red-800/25 text-base font-semibold rounded-xl gap-3"
-                >
-                  <LogOut className="w-4.5 h-4.5" />
-                  {t('logout')}
-                </Button>
-              </>
+            {/* Conditional mobile actions based on authentication */}
+            {isAuthenticated ? (
+              // Authenticated mobile actions - Show Profile button
+              <Button 
+                variant="outline" 
+                onClick={() => navigateToPage('/profile')} 
+                className="w-full h-11 sm:h-12 bg-slate-800/35 border-slate-600/35 text-slate-200 hover:text-white text-base font-semibold rounded-xl gap-3"
+              >
+                <User className="w-4.5 h-4.5" />
+                {t('profile')}
+                {user?.name && (
+                  <span className="text-sm text-slate-400 ml-auto">
+                    {user.name.split(' ')[0]}
+                  </span>
+                )}
+              </Button>
             ) : (
+              // Unauthenticated mobile actions
               <>
                 <Button 
                   variant="outline" 
