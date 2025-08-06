@@ -8,11 +8,11 @@ import { useNavigate } from 'react-router-dom';
 
 const Signin: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail]           = useState<string>('');
-  const [password, setPassword]     = useState<string>('');
+  const [email, setEmail]               = useState<string>('');
+  const [password, setPassword]         = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [error, setError]           = useState<string>('');
-  const [loading, setLoading]       = useState<boolean>(false);
+  const [error, setError]               = useState<string>('');
+  const [loading, setLoading]           = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +22,7 @@ const Signin: React.FC = () => {
     try {
       const base = import.meta.env.VITE_API_URL;
       const res = await axios.post(
-        `${base}/api/users/login`,       // ← updated path
+        `${base}/api/users/signin`,       // ← use /signin, not /login
         { email, password },
         { headers: { 'Content-Type': 'application/json' } }
       );
