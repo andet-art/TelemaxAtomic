@@ -6,12 +6,15 @@ export const createOrder = async (req, res) => {
   try {
     const { customer, paymentMethod, items, summary, timestamp } = req.body;
 
-    // Validate required fields
+    // 🧠 Validate required fields
     if (!customer || !items || items.length === 0 || !summary || !paymentMethod) {
       return res.status(400).json({ error: 'Missing required order fields.' });
     }
 
     console.log('📦 Incoming order payload:', req.body);
+
+    // ✅ Format timestamp to MySQL format
+    const formattedTimestamp = timestamp.replace('T', ' ').replace('Z', '');
 
     const orderValues = [
       customer.fullName,
@@ -27,12 +30,12 @@ export const createOrder = async (req, res) => {
       summary.tax,
       summary.shipping,
       summary.total,
-      timestamp,
+      formattedTimestamp,
     ];
 
     console.log('🛠 Inserting into orders with:', orderValues);
 
-    // Insert order
+    // ✅ Insert into orders table
     const [orderResult] = await db.execute(
       `INSERT INTO orders (
         full_name, email, phone, address1, address2, city, postal_code, country,
@@ -44,7 +47,7 @@ export const createOrder = async (req, res) => {
     const orderId = orderResult.insertId;
     console.log('🆔 Order inserted with ID:', orderId);
 
-    // Insert order items
+    // ✅ Insert into order_items table
     const itemInserts = items.map((item) => {
       console.log('📦 Inserting item:', item);
       return db.execute(
@@ -57,6 +60,7 @@ export const createOrder = async (req, res) => {
     await Promise.all(itemInserts);
     console.log('✅ All order items inserted.');
 
+    // ✅ Respond success
     res.status(201).json({ message: 'Order placed successfully!' });
   } catch (err) {
     console.error('[ORDER ERROR]', err);
