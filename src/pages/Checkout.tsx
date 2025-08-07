@@ -12,7 +12,7 @@ export type CartItem = {
   id: number;
   name: string;
   description?: string;
-  price: number | string;
+  price: number;
   photos?: string[];
   quantity: number;
 };
@@ -34,28 +34,45 @@ const Checkout: React.FC = () => {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Load cart from localStorage once
+  // Load just IDs & quantities, then fetch full product data
   useEffect(() => {
     const saved = localStorage.getItem('cart');
-    if (saved) setCart(JSON.parse(saved));
+    if (!saved) return;
+
+    const savedCart: { id: number; quantity: number }[] = JSON.parse(saved);
+    const ids = savedCart.map(i => i.id);
+    console.log('Cart product IDs:', ids);
+
+    // Fetch all products, then filter by IDs in cart
+    fetch(`${API_BASE}/api/products`)
+      .then(res => res.json())
+      .then((allProducts: Omit<CartItem, 'quantity'>[]) => {
+        const enriched: CartItem[] = savedCart
+          .map(({ id, quantity }) => {
+            const p = allProducts.find(prod => prod.id === id);
+            return p
+              ? { ...p, price: Number(p.price), quantity }
+              : null;
+          })
+          .filter((x): x is CartItem => x !== null);
+        setCart(enriched);
+      })
+      .catch(err => {
+        console.error('Failed to fetch products:', err);
+      });
   }, []);
 
   // Price calculations
-  const subtotal = cart.reduce(
-    (sum, item) => sum + parseFloat(String(item.price)) * item.quantity,
-    0
-  );
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = subtotal * 0.1;
   const shipping = subtotal > 100 ? 0 : 15;
   const total = subtotal + tax + shipping;
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    const { name, value, type } = e.target;
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'radio' ? value : value
+      [name]: value
     }));
   };
 
@@ -83,11 +100,13 @@ const Checkout: React.FC = () => {
         summary: { subtotal, tax, shipping, total },
         timestamp: new Date().toISOString()
       };
+
       await fetch(`${API_BASE}/api/orders`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(orderPayload)
       });
+
       setSuccess(true);
       localStorage.removeItem('cart');
       setTimeout(() => navigate('/orders'), 3000);
@@ -130,7 +149,7 @@ const Checkout: React.FC = () => {
               {cart.map(item => (
                 <li key={item.id} className="py-3 flex justify-between">
                   <span>{item.name} × {item.quantity}</span>
-                  <span>${(parseFloat(String(item.price)) * item.quantity).toFixed(2)}</span>
+                  <span>${(item.price * item.quantity).toFixed(2)}</span>
                 </li>
               ))}
             </ul>
@@ -271,11 +290,7 @@ const Checkout: React.FC = () => {
               disabled={submitting || cart.length === 0}
               className="w-full bg-primary text-primary-foreground py-3 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
-              {submitting ? (
-                'Processing...'
-              ) : (
-                <><CreditCard className="w-5 h-5 mr-2" />Place Order</>
-              )}
+              {submitting ? 'Processing...' : <><CreditCard className="w-5 h-5 mr-2" />Place Order</>}
             </button>
           </form>
         </div>
