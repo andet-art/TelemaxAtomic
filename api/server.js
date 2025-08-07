@@ -11,11 +11,7 @@ import orderRoutes from './routes/orderRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import modelRoutes from './routes/modelRoutes.js';
-
 import contactRoutes from './routes/contactRoutes.js';
-
-
-
 
 import errorHandler from './middleware/errorHandler.js';
 
@@ -50,10 +46,16 @@ app.use(cors({
 // ✅ JSON body parser
 app.use(express.json());
 
-// ✅ Static file serving
+// ✅ Static file serving for uploads
 app.use(
   '/uploads',
   express.static(path.join(__dirname, '..', 'public/uploads'))
+);
+
+// ✅ Static file serving for version‐controlled assets
+app.use(
+  '/assets',
+  express.static(path.join(__dirname, '..', 'assets'))
 );
 
 // ✅ Routes
@@ -64,7 +66,6 @@ app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/contact', contactRoutes);
-
 
 // ✅ Error handling middleware
 app.use(errorHandler);
