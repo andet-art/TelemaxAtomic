@@ -22,6 +22,7 @@ import Cart    from "./pages/Cart";
 import SignIn from "./pages/SignIn";
 import Join   from "./pages/Join";
 import NotFound from "./pages/NotFound";
+import Checkout from "./pages/Checkout";
 
 const queryClient = new QueryClient();
 
@@ -88,6 +89,7 @@ function App() {
                     </MainLayout>
                   }
                 />
+                <Route path="/checkout" element={<Checkout />} />
 
                 <Route
                   path="*"
