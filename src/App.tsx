@@ -23,6 +23,7 @@ import SignIn from "./pages/SignIn";
 import Join   from "./pages/Join";
 import NotFound from "./pages/NotFound";
 import Checkout from "./pages/Checkout";
+import AdminDashboard from "./pages/AdminDashboard";
 
 const queryClient = new QueryClient();
 
@@ -90,6 +91,14 @@ function App() {
                   }
                 />
                 <Route path="/checkout" element={<Checkout />} />
+                <Route
+                  path="adminDashboard"
+                  element={
+                    <MainLayout>
+                      <AdminDashboard />
+                    </MainLayout>
+                  }
+                />
 
                 <Route
                   path="*"

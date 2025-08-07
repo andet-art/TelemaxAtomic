@@ -108,9 +108,11 @@ export default function Sidebar({ onCategorySelect, onModelSelect }: SidebarProp
   if (loading) {
     return (
       <aside style={isMobile ? { top: NAVBAR_HEIGHT } : undefined}
-             className={`fixed left-0 z-30 h-full bg-white border-r border-gray-200
+             className={`fixed left-0 z-30 h-full 
+                         bg-white dark:bg-gray-800 
+                         border-r border-gray-200 dark:border-gray-700
                          transition-all duration-300 ease-in-out overflow-hidden ${sidebarWidth}`}>
-        <div className="p-4 text-gray-500">Loading…</div>
+        <div className="p-4 text-gray-500 dark:text-gray-400">Loading…</div>
       </aside>
     );
   }
@@ -118,9 +120,11 @@ export default function Sidebar({ onCategorySelect, onModelSelect }: SidebarProp
   if (error) {
     return (
       <aside style={isMobile ? { top: NAVBAR_HEIGHT } : undefined}
-             className={`fixed left-0 z-30 h-full bg-white border-r border-gray-200
+             className={`fixed left-0 z-30 h-full 
+                         bg-white dark:bg-gray-800 
+                         border-r border-gray-200 dark:border-gray-700
                          transition-all duration-300 ease-in-out overflow-hidden ${sidebarWidth}`}>
-        <div className="p-4 text-red-500 text-sm">Error: {error}</div>
+        <div className="p-4 text-red-500 dark:text-red-400 text-sm">Error: {error}</div>
       </aside>
     );
   }
@@ -137,13 +141,19 @@ export default function Sidebar({ onCategorySelect, onModelSelect }: SidebarProp
       {isMobile && (
         <button onClick={() => setMobileOpen(prev => !prev)}
                 style={{ top: NAVBAR_HEIGHT }}
-                className="fixed left-4 z-50 p-2 bg-white rounded-lg shadow-lg border">
+                className="fixed left-4 z-50 p-2 
+                           bg-white dark:bg-gray-800 
+                           text-gray-900 dark:text-white
+                           rounded-lg shadow-lg 
+                           border border-gray-200 dark:border-gray-700
+                           hover:bg-gray-50 dark:hover:bg-gray-700
+                           transition-colors duration-200">
           <div className="space-y-1">
-            <div className={`w-5 h-0.5 bg-gray-600 transition-transform
+            <div className={`w-5 h-0.5 bg-gray-600 dark:bg-gray-300 transition-transform
                               ${mobileOpen ? 'rotate-45 translate-y-1.5' : ''}`} />
-            <div className={`w-5 h-0.5 bg-gray-600 transition-opacity
+            <div className={`w-5 h-0.5 bg-gray-600 dark:bg-gray-300 transition-opacity
                               ${mobileOpen ? 'opacity-0' : ''}`} />
-            <div className={`w-5 h-0.5 bg-gray-600 transition-transform
+            <div className={`w-5 h-0.5 bg-gray-600 dark:bg-gray-300 transition-transform
                               ${mobileOpen ? '-rotate-45 -translate-y-1.5' : ''}`} />
           </div>
         </button>
@@ -152,16 +162,18 @@ export default function Sidebar({ onCategorySelect, onModelSelect }: SidebarProp
       <aside onMouseEnter={() => !isMobile && setIsHovered(true)}
              onMouseLeave={() => !isMobile && setIsHovered(false)}
              style={isMobile ? { top: NAVBAR_HEIGHT } : undefined}
-             className={`fixed left-0 z-30 h-full bg-white border-r border-gray-200
+             className={`fixed left-0 z-30 h-full 
+                         bg-white dark:bg-gray-800 
+                         border-r border-gray-200 dark:border-gray-700
                          transition-all duration-300 ease-in-out overflow-hidden ${sidebarWidth}
                          ${isMobile
                            ? (mobileOpen ? 'shadow-2xl' : '')
-                           : (isExpanded ? 'top-24 shadow-none' : 'top-0 shadow-lg')
+                           : (isExpanded ? 'top-24 shadow-none' : 'top-0 shadow-lg dark:shadow-black/20')
                          }`}>
         {/* Compact indicator */}
         {!isMobile && !isExpanded && (
-          <div className="flex justify-center py-3 border-b border-gray-100">
-            <div className="w-8 h-1 bg-gray-300 rounded-full" />
+          <div className="flex justify-center py-3 border-b border-gray-100 dark:border-gray-700">
+            <div className="w-8 h-1 bg-gray-300 dark:bg-gray-600 rounded-full" />
           </div>
         )}
 
@@ -169,15 +181,18 @@ export default function Sidebar({ onCategorySelect, onModelSelect }: SidebarProp
           {/* All button */}
           <button onClick={handleAll}
                   className={`w-full flex items-center justify-between rounded-lg
-                              transition-all duration-200 hover:bg-gray-50
+                              transition-all duration-200 
+                              hover:bg-gray-50 dark:hover:bg-gray-700
                               ${isExpanded ? 'px-3 py-2.5' : 'px-2 py-3 justify-center'}
-                              ${openCat === null ? 'bg-blue-50 text-blue-700' : 'text-gray-700'}
+                              ${openCat === null 
+                                ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
+                                : 'text-gray-700 dark:text-gray-300'}
                              `}
                   title={!isExpanded ? 'All' : undefined}>
             {isExpanded
               ? <span className="font-medium text-sm truncate">All</span>
-              : <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">A</span>
+              : <div className="w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-white dark:text-gray-200">A</span>
                 </div>
             }
           </button>
@@ -190,9 +205,12 @@ export default function Sidebar({ onCategorySelect, onModelSelect }: SidebarProp
               <div key={cat.id}>
                 <button onClick={() => handleCat(cat.id, catOpen)}
                         className={`w-full flex items-center justify-between rounded-lg
-                                     transition-all duration-200 hover:bg-gray-50
+                                     transition-all duration-200 
+                                     hover:bg-gray-50 dark:hover:bg-gray-700
                                      ${isExpanded ? 'px-3 py-2.5' : 'px-2 py-3 justify-center'}
-                                     ${catOpen ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:text-gray-900'}
+                                     ${catOpen 
+                                       ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
+                                       : 'text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'}
                                     `}
                         title={!isExpanded ? cat.name : undefined}>
                   {isExpanded
@@ -200,8 +218,8 @@ export default function Sidebar({ onCategorySelect, onModelSelect }: SidebarProp
                         <span className="font-medium text-sm truncate">{cat.name}</span>
                         <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${catOpen ? 'rotate-180' : ''}`} />
                       </>
-                    : <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
-                        <span className="text-xs font-bold text-white">
+                    : <div className="w-6 h-6 bg-gray-400 dark:bg-gray-600 rounded-full flex items-center justify-center">
+                        <span className="text-xs font-bold text-white dark:text-gray-200">
                           {cat.name.charAt(0).toUpperCase()}
                         </span>
                       </div>
@@ -215,7 +233,8 @@ export default function Sidebar({ onCategorySelect, onModelSelect }: SidebarProp
                                 animate={{ height: 'auto', opacity: 1 }}
                                 exit={{ height: 0, opacity: 0 }}
                                 transition={{ duration: 0.2, ease: 'easeInOut' }}
-                                className="overflow-hidden ml-3 mt-1 space-y-1 border-l border-gray-200 pl-3">
+                                className="overflow-hidden ml-3 mt-1 space-y-1 
+                                           border-l border-gray-200 dark:border-gray-700 pl-3">
                       {catModels.map(m => {
                         const modelOpen = openModel === m.id;
                         const mProds = products.filter(p => p.model_id === m.id);
@@ -224,7 +243,9 @@ export default function Sidebar({ onCategorySelect, onModelSelect }: SidebarProp
                             <button onClick={() => handleModel(m.id, modelOpen)}
                                     className={`w-full flex items-center justify-between px-2 py-1.5 rounded
                                                  text-sm transition-colors duration-150
-                                                 ${modelOpen ? 'bg-gray-100 text-gray-900' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'}
+                                                 ${modelOpen 
+                                                   ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white' 
+                                                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-700'}
                                                 `}>
                               <span className="truncate">{m.name}</span>
                               <ChevronRight className={`w-3 h-3 transition-transform duration-200 ${modelOpen ? 'rotate-90' : ''}`} />
@@ -242,7 +263,9 @@ export default function Sidebar({ onCategorySelect, onModelSelect }: SidebarProp
                                     <button key={p.id}
                                             onClick={() => onCategorySelect === null && onModelSelect === null}
                                             className="block w-full text-left px-2 py-1 text-xs
-                                                       text-gray-500 hover:text-blue-600 hover:bg-blue-50
+                                                       text-gray-500 dark:text-gray-400 
+                                                       hover:text-blue-600 dark:hover:text-blue-400 
+                                                       hover:bg-blue-50 dark:hover:bg-blue-900/20
                                                        rounded transition-colors duration-150 truncate"
                                             title={p.name}>
                                       • {p.name}
