@@ -9,10 +9,11 @@ import userRoutes from './routes/userRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import statsRoutes from './routes/statsRoutes.js';
-
-// 👇 New imports for categories & models
 import categoryRoutes from './routes/categoryRoutes.js';
-import modelRoutes    from './routes/modelRoutes.js';
+import modelRoutes from './routes/modelRoutes.js';
+
+// ✅ NEW: import contact routes
+import contactRoutes from './routes/contactRoutes.js';
 
 import errorHandler from './middleware/errorHandler.js';
 
@@ -26,8 +27,8 @@ const __dirname = path.dirname(__filename);
 
 // ✅ Allowed origins
 const allowedOrigins = [
-  'http://localhost:3000',       // React dev server
-  'http://localhost:8080',       // if you use a different port
+  'http://localhost:3000',
+  'http://localhost:8080',
   'http://134.122.71.254',
   'http://134.122.71.254:4000',
 ];
@@ -47,19 +48,20 @@ app.use(cors({
 // ✅ JSON body parser
 app.use(express.json());
 
-// ✅ Static file serving for uploaded files
+// ✅ Static file serving
 app.use(
   '/uploads',
   express.static(path.join(__dirname, '..', 'public/uploads'))
 );
 
 // ✅ Routes
-app.use('/api/users',    userRoutes);
-app.use('/api/categories', categoryRoutes);  // ← categories endpoints
-app.use('/api/models',     modelRoutes);     // ← models endpoints
+app.use('/api/users', userRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/models', modelRoutes);
 app.use('/api/products', productRoutes);
-app.use('/api/orders',   orderRoutes);
-app.use('/api/stats',    statsRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/stats', statsRoutes);
+app.use('/api/contact', contactRoutes); // ✅ NEW: contact route
 
 // ✅ Error handling middleware
 app.use(errorHandler);

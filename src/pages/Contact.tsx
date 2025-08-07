@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { ArrowRight, Sparkles, Mail, Phone, MapPin, Clock, Users, Smile } from 'lucide-react';
+import { ArrowRight, Sparkles, Mail, Phone, MapPin, Clock, Smile } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +13,7 @@ const Contact = () => {
     email: '',
     subject: '',
     message: '',
-    referral: ''
+    referral: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -20,8 +22,8 @@ const Contact = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-    setErrors(prev => ({ ...prev, [name]: undefined }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const validateForm = () => {
@@ -33,7 +35,8 @@ const Contact = () => {
       newErrors.email = 'Email is invalid';
     }
     if (!formData.subject.trim()) newErrors.subject = 'Subject is required';
-    if (!formData.message.trim() || formData.message.length < 10) newErrors.message = 'Message must be at least 10 characters';
+    if (!formData.message.trim() || formData.message.length < 10)
+      newErrors.message = 'Message must be at least 10 characters';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -42,12 +45,25 @@ const Contact = () => {
     e.preventDefault();
     if (!validateForm()) return;
     setIsSubmitting(true);
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const res = await fetch(`${API_BASE}/api/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to send message');
+      }
+
       setIsSubmitted(true);
       setFormData({ name: '', email: '', subject: '', message: '', referral: '' });
     } catch (error) {
       alert('Failed to send message. Please try again.');
+      console.error(error);
     } finally {
       setIsSubmitting(false);
     }
@@ -61,8 +77,12 @@ const Contact = () => {
             <Smile className="w-12 h-12 text-green-500" />
           </div>
           <h2 className="text-3xl font-bold mb-2">Message Sent!</h2>
-          <p className="text-muted-foreground mb-6">Thanks for reaching out. We'll get back to you within 24 hours.</p>
-          <Button onClick={() => setIsSubmitted(false)} className="luxury-gradient">Send Another Message</Button>
+          <p className="text-muted-foreground mb-6">
+            Thanks for reaching out. We'll get back to you within 24 hours.
+          </p>
+          <Button onClick={() => setIsSubmitted(false)} className="luxury-gradient">
+            Send Another Message
+          </Button>
         </div>
       </div>
     );
@@ -80,7 +100,9 @@ const Contact = () => {
             <span className="text-sm font-semibold">We'd love to hear from you</span>
           </div>
           <h1 className="text-4xl sm:text-6xl font-black">Contact Us</h1>
-          <p className="text-muted-foreground text-lg">Our team is here to answer your questions and provide the support you need.</p>
+          <p className="text-muted-foreground text-lg">
+            Our team is here to answer your questions and provide the support you need.
+          </p>
         </div>
       </section>
 
@@ -89,7 +111,9 @@ const Contact = () => {
         <div className="space-y-8">
           <div className="space-y-4">
             <h2 className="text-xl font-bold">Get in Touch</h2>
-            <p className="text-muted-foreground">Reach out to us by filling the form or through our contact details.</p>
+            <p className="text-muted-foreground">
+              Reach out to us by filling the form or through our contact details.
+            </p>
           </div>
           <div className="space-y-4 text-sm text-muted-foreground">
             <div className="flex items-center gap-3">
@@ -188,6 +212,7 @@ const Contact = () => {
           </form>
         </div>
       </section>
+
       <Footer />
     </div>
   );
