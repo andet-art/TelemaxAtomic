@@ -6,6 +6,7 @@ import { Sparkles, ShoppingBag, X, ShoppingCart, Eye, Plus, Minus, Check } from 
 import Footer from '@/components/Footer';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const STATIC_TEST_IMG = `${API_BASE}/assets/products/test.png`;
 const PLACEHOLDER_IMG = 'https://via.placeholder.com/400x240?text=No+Image';
 
 type Product = {
@@ -327,7 +328,7 @@ const Orders: React.FC = () => {
           ) : paged.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
               {paged.map(prod => {
-                const photoUrl = (prod.photos && prod.photos.length)
+                const photoUrl = prod.photos?.length
                 ? `${API_BASE}/${prod.photos[0]}`
                 : PLACEHOLDER_IMG;
                 return (
