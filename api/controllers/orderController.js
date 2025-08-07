@@ -1,50 +1,40 @@
-import * as Order from '../models/orderModel.js';
+import db from '../config/db.js';
 
-export const createOrder = async (req, res, next) => {
+export const createOrder = async (req, res) => {
   try {
-    const { user_id, total_amount, status, items } = req.body;
+    const { customer, paymentMethod, items, summary, timestamp } = req.body;
 
-    if (!user_id || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ message: 'Missing or invalid order data' });
-    }
+    // Step 1: Insert order
+    const [orderResult] = await db.execute(
+      `INSERT INTO orders (
+        full_name, email, phone, address1, address2, city, postal_code, country,
+        payment_method, subtotal, tax, shipping, total, timestamp
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        customer.fullName, customer.email, customer.phone,
+        customer.address1, customer.address2, customer.city,
+        customer.postalCode, customer.country, paymentMethod,
+        summary.subtotal, summary.tax, summary.shipping, summary.total,
+        timestamp
+      ]
+    );
 
-    await Order.createOrder(req.body);
-    res.status(201).json({ message: 'Order placed successfully' });
+    const orderId = orderResult.insertId;
+
+    // Step 2: Insert each item
+    const itemInserts = items.map(item =>
+      db.execute(
+        `INSERT INTO order_items (order_id, product_id, quantity, price)
+         VALUES (?, ?, ?, ?)`,
+        [orderId, item.product_id, item.quantity, item.price]
+      )
+    );
+
+    await Promise.all(itemInserts);
+
+    res.status(201).json({ message: 'Order placed successfully!' });
   } catch (err) {
-    console.error('Error creating order:', err.message);
-    next(err);
-  }
-};
-
-export const getOrders = async (req, res, next) => {
-  try {
-    const [orders] = await Order.getAllOrders();
-    res.json(orders);
-  } catch (err) {
-    console.error('Error fetching orders:', err.message);
-    next(err);
-  }
-};
-
-export const getOrder = async (req, res, next) => {
-  try {
-    const [order] = await Order.getOrderById(req.params.id);
-    if (!order.length) {
-      return res.status(404).json({ message: 'Order not found' });
-    }
-    res.json(order[0]);
-  } catch (err) {
-    console.error('Error fetching order:', err.message);
-    next(err);
-  }
-};
-
-export const deleteOrder = async (req, res, next) => {
-  try {
-    await Order.deleteOrder(req.params.id);
-    res.json({ message: 'Order deleted' });
-  } catch (err) {
-    console.error('Error deleting order:', err.message);
-    next(err);
+    console.error('[ORDER ERROR]', err);
+    res.status(500).json({ error: 'Something went wrong with your order!' });
   }
 };
