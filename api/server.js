@@ -15,6 +15,8 @@ import modelRoutes from './routes/modelRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
 
 
+
+
 import errorHandler from './middleware/errorHandler.js';
 
 dotenv.config();
@@ -61,7 +63,8 @@ app.use('/api/models', modelRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/stats', statsRoutes);
-app.use('/api/contact', contactRoutes); // ✅ NEW: contact route
+app.use('/api/contact', contactRoutes);
+
 
 // ✅ Error handling middleware
 app.use(errorHandler);
