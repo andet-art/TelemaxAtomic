@@ -1,3 +1,4 @@
+// api/routes/productRoutes.js
 import express from 'express';
 import mysql from 'mysql2/promise';
 import {
@@ -10,18 +11,18 @@ import { isAdmin } from '../middleware/isAdmin.js';
 
 const router = express.Router();
 
-// DB connection config (ensure .env has DB_HOST, DB_USER, DB_PASS, DB_NAME)
+// DB connection config (ensure .env has DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)
 const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'your_db_user',
-  password: process.env.DB_PASS || 'your_db_pass',
-  database: process.env.DB_NAME || 'your_db_name'
+  host:     process.env.DB_HOST     || 'localhost',
+  user:     process.env.DB_USER     || 'your_db_user',
+  password: process.env.DB_PASSWORD || 'your_db_pass',
+  database: process.env.DB_NAME     || 'your_db_name'
 };
 
 // Public route: Get all products with their photos
 router.get('/', async (req, res, next) => {
   try {
-    const conn = await mysql.createConnection(dbConfig);
+    const conn     = await mysql.createConnection(dbConfig);
     const [products] = await conn.execute('SELECT * FROM products');
     const [photos]   = await conn.execute('SELECT product_id, url FROM product_photos');
     await conn.end();
@@ -44,7 +45,7 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
   try {
     const { id } = req.params;
-    const conn = await mysql.createConnection(dbConfig);
+    const conn     = await mysql.createConnection(dbConfig);
     const [products] = await conn.execute('SELECT * FROM products WHERE id = ?', [id]);
     const [photos]   = await conn.execute('SELECT url FROM product_photos WHERE product_id = ?', [id]);
     await conn.end();
