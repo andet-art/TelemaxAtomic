@@ -52,10 +52,10 @@ app.use(
   express.static(path.join(__dirname, '..', 'public/uploads'))
 );
 
-// ✅ Static file serving for version‐controlled assets
+// ✅ Static file serving for version‐controlled assets under src/assets
 app.use(
   '/assets',
-  express.static(path.join(__dirname, '..', 'assets'))
+  express.static(path.join(__dirname, '..', 'src', 'assets'))
 );
 
 // ✅ Routes

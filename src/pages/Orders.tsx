@@ -328,8 +328,8 @@ const Orders: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
               {paged.map(prod => {
                 const photoUrl = (prod.photos && prod.photos.length)
-                  ? prod.photos[0]!
-                  : PLACEHOLDER_IMG;
+                ? `${API_BASE}/${prod.photos[0]}`
+                : PLACEHOLDER_IMG;
                 return (
                   <div key={prod.id} className="border border-gray-200 dark:border-gray-700 
                                                  bg-white dark:bg-gray-800 
