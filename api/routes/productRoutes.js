@@ -10,7 +10,7 @@ import { isAdmin } from '../middleware/isAdmin.js';
 
 const router = express.Router();
 
-// DB connection config (ensure these env vars are set)
+// DB connection config (ensure .env has DB_HOST, DB_USER, DB_PASS, DB_NAME)
 const dbConfig = {
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'your_db_user',
@@ -26,7 +26,6 @@ router.get('/', async (req, res, next) => {
     const [photos]   = await conn.execute('SELECT product_id, url FROM product_photos');
     await conn.end();
 
-    // merge photos into products
     const productsWithPhotos = products.map(product => ({
       ...product,
       photos: photos
@@ -36,6 +35,7 @@ router.get('/', async (req, res, next) => {
 
     res.json(productsWithPhotos);
   } catch (err) {
+    console.error('Error in GET /api/products:', err);
     next(err);
   }
 });
@@ -57,6 +57,7 @@ router.get('/:id', async (req, res, next) => {
     product.photos = photos.map(p => p.url);
     res.json(product);
   } catch (err) {
+    console.error('Error in GET /api/products/:id:', err);
     next(err);
   }
 });
