@@ -12,8 +12,8 @@ import statsRoutes from './routes/statsRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import modelRoutes from './routes/modelRoutes.js';
 
-// ✅ NEW: import contact routes
 import contactRoutes from './routes/contactRoutes.js';
+
 
 import errorHandler from './middleware/errorHandler.js';
 
