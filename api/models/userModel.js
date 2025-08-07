@@ -17,3 +17,9 @@ export const findUserById = async (id) => {
   const [rows] = await db.query('SELECT * FROM users WHERE id = ?', [id]);
   return rows[0];
 };
+
+// ✅ New
+export const getAllUsersFromDB = async () => {
+  const [rows] = await db.query('SELECT * FROM users ORDER BY created_at DESC');
+  return rows;
+};

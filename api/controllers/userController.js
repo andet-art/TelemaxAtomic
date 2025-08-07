@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
-import { createUser, findUserByEmail } from '../models/userModel.js';
+import { createUser, findUserByEmail, getAllUsersFromDB } from '../models/userModel.js';
 
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
@@ -29,4 +29,15 @@ export const signin = async (req, res) => {
   const token = jwt.sign({ id: user.id, email }, config.jwtSecret, { expiresIn: '7d' });
 
   res.json({ token });
+};
+
+// ✅ New
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await getAllUsersFromDB();
+    res.json(users);
+  } catch (err) {
+    console.error('Error fetching users:', err.message);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
 };
