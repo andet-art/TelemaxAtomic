@@ -1,18 +1,24 @@
+// src/pages/Signin.tsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Eye, EyeOff, LogIn, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext'; // ✅ Import context
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+
+// Ensure baseURL is set
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const Signin: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // ✅ Use context
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const location = useLocation<{ from?: Location }>();
+  const { login } = useAuth();
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,26 +26,19 @@ const Signin: React.FC = () => {
     setLoading(true);
 
     try {
-      const base = import.meta.env.VITE_API_URL;
-      const res = await axios.post(
-        `${base}/api/users/signin`,
-        { email, password },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
-
-      // ✅ Save token & user object to localStorage
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user)); // ✅ Properly store user
-      login(res.data.user); // ✅ Pass user to context
-
-      // ✅ Redirect to profile
-      navigate('/profile');
-
+      const res = await axios.post('/api/users/signin', { email, password });
+      if (res.data?.user && res.data?.token) {
+        login(res.data.user, res.data.token);
+        const from = location.state?.from?.pathname || '/profile';
+        navigate(from, { replace: true });
+      } else {
+        setError('Server did not return expected user/token');
+      }
     } catch (err: any) {
-      const msg =
+      setError(
         err.response?.data?.message ||
-        'Login failed. Please check your credentials and try again.';
-      setError(msg);
+          'Login failed. Please check your credentials and try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -61,14 +60,10 @@ const Signin: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Email Address
-              </label>
+              <label className="block text-sm font-medium mb-1">Email Address</label>
               <input
                 type="email"
-                name="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -77,15 +72,11 @@ const Signin: React.FC = () => {
               />
             </div>
 
-            {/* Password */}
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Password
-              </label>
+              <label className="block text-sm font-medium mb-1">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  name="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -98,12 +89,15 @@ const Signin: React.FC = () => {
                   className="absolute right-3 top-3 text-muted-foreground"
                   aria-label="Toggle password visibility"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
 
-            {/* Remember & Forgot */}
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm">
                 <input
@@ -112,15 +106,13 @@ const Signin: React.FC = () => {
                 />
                 Remember me
               </label>
-              <a href="/forgot-password" className="text-sm text-primary hover:underline">
+              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
-            {/* Error */}
             {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
 
-            {/* Submit */}
             <Button
               type="submit"
               className="w-full py-3 text-lg luxury-gradient font-bold"
@@ -130,12 +122,11 @@ const Signin: React.FC = () => {
               <LogIn className="w-5 h-5 ml-2" />
             </Button>
 
-            {/* Signup link */}
             <div className="text-center text-sm text-muted-foreground">
               Don’t have an account?{' '}
-              <a href="/signup" className="text-primary hover:underline">
+              <Link to="/join" className="text-primary hover:underline">
                 Create one
-              </a>
+              </Link>
             </div>
           </form>
         </div>
