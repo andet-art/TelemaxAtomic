@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Eye, EyeOff, LogIn, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
 // Ensure baseURL is set
@@ -11,7 +11,9 @@ axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const Signin: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation<{ from?: Location }>();
   const { login } = useAuth();
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -25,11 +27,14 @@ const Signin: React.FC = () => {
 
     try {
       const res = await axios.post('/api/users/signin', { email, password });
-      // Persist user + token and wire up axios
-      login(res.data.user, res.data.token);
-      navigate('/profile');
+      if (res.data?.user && res.data?.token) {
+        login(res.data.user, res.data.token);
+        const from = location.state?.from?.pathname || '/profile';
+        navigate(from, { replace: true });
+      } else {
+        setError('Server did not return expected user/token');
+      }
     } catch (err: any) {
-      console.error('Signin error', err);
       setError(
         err.response?.data?.message ||
           'Login failed. Please check your credentials and try again.'
@@ -95,7 +100,10 @@ const Signin: React.FC = () => {
 
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" className="form-checkbox rounded border-border text-primary" />
+                <input
+                  type="checkbox"
+                  className="form-checkbox rounded border-border text-primary"
+                />
                 Remember me
               </label>
               <Link to="/forgot-password" className="text-sm text-primary hover:underline">

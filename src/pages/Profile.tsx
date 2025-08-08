@@ -1,12 +1,23 @@
+// src/pages/Profile.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { Mail, Phone, MapPin, Pencil, ShoppingBag, Heart, Star, User } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Pencil,
+  ShoppingBag,
+  Heart,
+  Star,
+  User,
+  LogOut,
+} from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [userData, setUserData] = useState<any>(null);
 
@@ -38,6 +49,11 @@ const Profile: React.FC = () => {
     );
   }
 
+  const handleLogout = () => {
+    logout();
+    navigate('/signin', { replace: true });
+  };
+
   return (
     <div className="min-h-screen bg-white text-black dark:bg-zinc-900 dark:text-white transition-colors duration-300">
       {/* Hero Banner */}
@@ -49,10 +65,19 @@ const Profile: React.FC = () => {
             alt="User Avatar"
             className="w-24 h-24 rounded-full border-4 border-white dark:border-border shadow-xl"
           />
-          <div>
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-white">{userData.name}</h1>
             <p className="text-white/80">Joined {userData.joined || 'Unknown date'}</p>
-            <button className="mt-3 px-4 py-2 text-sm bg-white text-black dark:bg-zinc-800 dark:text-white rounded-md hover:bg-white/90 dark:hover:bg-zinc-700 flex items-center gap-2">
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleLogout}
+              className="px-3 py-2 text-sm bg-red-500 text-white rounded-md hover:bg-red-600 flex items-center gap-1"
+            >
+              <LogOut className="w-4 h-4" />
+              Log Out
+            </button>
+            <button className="px-3 py-2 text-sm bg-white text-black dark:bg-zinc-800 dark:text-white rounded-md hover:bg-white/90 dark:hover:bg-zinc-700 flex items-center gap-1">
               <Pencil className="w-4 h-4" />
               Edit Profile
             </button>
@@ -77,7 +102,9 @@ const Profile: React.FC = () => {
               </div>
               <div className="flex items-center gap-3">
                 <MapPin className="w-4 h-4 text-yellow-500" />
-                {(userData.city || 'City not set') + ', ' + (userData.country || 'Country not set')}
+                {(userData.city || 'City not set') +
+                  ', ' +
+                  (userData.country || 'Country not set')}
               </div>
             </div>
           </div>
@@ -98,10 +125,30 @@ const Profile: React.FC = () => {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-              { icon: ShoppingBag, label: 'Orders', value: userData.orders || 0, bg: 'from-indigo-300 to-indigo-500 dark:from-indigo-700 dark:to-indigo-900' },
-              { icon: Heart, label: 'Favorites', value: userData.favorites || 0, bg: 'from-pink-300 to-pink-500 dark:from-pink-600 dark:to-pink-800' },
-              { icon: Star, label: 'Reviews', value: userData.reviews || 0, bg: 'from-yellow-300 to-yellow-500 dark:from-yellow-600 dark:to-yellow-700' },
-              { icon: User, label: 'Addresses', value: userData.addresses || 0, bg: 'from-cyan-300 to-cyan-500 dark:from-cyan-600 dark:to-cyan-800' },
+              {
+                icon: ShoppingBag,
+                label: 'Orders',
+                value: userData.orders || 0,
+                bg: 'from-indigo-300 to-indigo-500 dark:from-indigo-700 dark:to-indigo-900',
+              },
+              {
+                icon: Heart,
+                label: 'Favorites',
+                value: userData.favorites || 0,
+                bg: 'from-pink-300 to-pink-500 dark:from-pink-600 dark:to-pink-800',
+              },
+              {
+                icon: Star,
+                label: 'Reviews',
+                value: userData.reviews || 0,
+                bg: 'from-yellow-300 to-yellow-500 dark:from-yellow-600 dark:to-yellow-700',
+              },
+              {
+                icon: User,
+                label: 'Addresses',
+                value: userData.addresses || 0,
+                bg: 'from-cyan-300 to-cyan-500 dark:from-cyan-600 dark:to-cyan-800',
+              },
             ].map(({ icon: Icon, label, value, bg }, i) => (
               <div
                 key={i}
@@ -120,7 +167,10 @@ const Profile: React.FC = () => {
             <ul className="space-y-4 text-sm text-zinc-700 dark:text-white/80">
               {userData.recentActivity?.length ? (
                 userData.recentActivity.map((activity: string, idx: number) => (
-                  <li key={idx} className="border-b border-zinc-300 dark:border-zinc-700 pb-3">
+                  <li
+                    key={idx}
+                    className="border-b border-zinc-300 dark:border-zinc-700 pb-3"
+                  >
                     {activity}
                   </li>
                 ))
