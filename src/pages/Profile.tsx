@@ -1,17 +1,4 @@
-<<<<<<< HEAD
-import React from 'react';
-import { Mail, Phone, MapPin, Pencil, ShoppingBag, Heart, Star, User } from 'lucide-react';
 
-const Profile = () => {
-  const user = {
-    name: 'Gerti Rexhepi',
-    email: 'gerti@example.com',
-    phone: '+389 70 123 456',
-    location: 'Skopje, North Macedonia',
-    avatar: 'https://i.pravatar.cc/150?img=5',
-    joined: 'Joined March 2024',
-  };
-=======
 // src/pages/Profile.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -62,7 +49,6 @@ const Profile: React.FC = () => {
       </div>
     );
   }
->>>>>>> 7f8880e40aac500d6e3b087e89e420186b53f3dc
 
   const handleLogout = () => {
     logout();
@@ -111,17 +97,7 @@ const Profile: React.FC = () => {
             <div className="space-y-3 text-sm text-zinc-800 dark:text-white/80">
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-primary" />
-<<<<<<< HEAD
-                {user.email}
-              </div>
-              <div className="flex items-center gap-3">
-                <Phone className="w-4 h-4 text-green-500" />
-                {user.phone}
-              </div>
-              <div className="flex items-center gap-3">
-                <MapPin className="w-4 h-4 text-yellow-500" />
-                {user.location}
-=======
+
                 {userData.email}
               </div>
               <div className="flex items-center gap-3">
@@ -133,7 +109,6 @@ const Profile: React.FC = () => {
                 {(userData.city || 'City not set') +
                   ', ' +
                   (userData.country || 'Country not set')}
->>>>>>> 7f8880e40aac500d6e3b087e89e420186b53f3dc
               </div>
             </div>
           </div>
@@ -154,12 +129,7 @@ const Profile: React.FC = () => {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
-<<<<<<< HEAD
-              { icon: ShoppingBag, label: 'Orders', value: 18, bg: 'from-indigo-300 to-indigo-500 dark:from-indigo-700 dark:to-indigo-900' },
-              { icon: Heart, label: 'Favorites', value: 35, bg: 'from-pink-300 to-pink-500 dark:from-pink-600 dark:to-pink-800' },
-              { icon: Star, label: 'Reviews', value: 12, bg: 'from-yellow-300 to-yellow-500 dark:from-yellow-600 dark:to-yellow-700' },
-              { icon: User, label: 'Addresses', value: 5, bg: 'from-cyan-300 to-cyan-500 dark:from-cyan-600 dark:to-cyan-800' },
-=======
+
               {
                 icon: ShoppingBag,
                 label: 'Orders',
@@ -184,7 +154,7 @@ const Profile: React.FC = () => {
                 value: userData.addresses || 0,
                 bg: 'from-cyan-300 to-cyan-500 dark:from-cyan-600 dark:to-cyan-800',
               },
->>>>>>> 7f8880e40aac500d6e3b087e89e420186b53f3dc
+
             ].map(({ icon: Icon, label, value, bg }, i) => (
               <div
                 key={i}
@@ -201,17 +171,6 @@ const Profile: React.FC = () => {
           <div className="bg-zinc-100 dark:bg-zinc-800 p-6 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-700">
             <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
             <ul className="space-y-4 text-sm text-zinc-700 dark:text-white/80">
-<<<<<<< HEAD
-              <li className="border-b border-zinc-300 dark:border-zinc-700 pb-3">
-                Ordered <span className="font-medium text-black dark:text-white">Atomic Jet Lighter</span> – 2 days ago
-              </li>
-              <li className="border-b border-zinc-300 dark:border-zinc-700 pb-3">
-                Reviewed <span className="font-medium text-black dark:text-white">Wooden Pipe Deluxe</span> – 5 stars
-              </li>
-              <li>
-                Updated profile – 1 week ago
-              </li>
-=======
               {userData.recentActivity?.length ? (
                 userData.recentActivity.map((activity: string, idx: number) => (
                   <li
@@ -224,7 +183,6 @@ const Profile: React.FC = () => {
               ) : (
                 <li>No recent activity</li>
               )}
->>>>>>> 7f8880e40aac500d6e3b087e89e420186b53f3dc
             </ul>
           </div>
         </div>
