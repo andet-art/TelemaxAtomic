@@ -1,1 +1,44 @@
-{}
+{
+  "contact": {
+    "title": "Na Kontaktoni",
+    "subtitle": "Ekipi ynë është këtu për t’ju ndihmuar dhe për t’ju përgjigjur çdo pyetje.",
+    "intro": "Na vjen mirë t’ju dëgjojmë",
+    "getInTouch": "Kontaktoni me ne",
+    "form": {
+      "name": "Emri dhe Mbiemri",
+      "email": "Email Adresa",
+      "subject": "Subjekti",
+      "message": "Mesazhi",
+      "referral": "Si dëgjuat për ne?",
+      "submit": "Dërgo Mesazhin",
+      "placeholderName": "Emri juaj",
+      "placeholderEmail": "ju@example.com",
+      "placeholderSubject": "Për çfarë bëhet fjalë?",
+      "placeholderMessage": "Na tregoni si mund t’ju ndihmojmë...",
+      "options": {
+        "choose": "Zgjidh një",
+        "google": "Kërkim në Google",
+        "instagram": "Instagram",
+        "friend": "Mik / Rekomandim",
+        "ad": "Reklamë / Promocion"
+      }
+    },
+    "info": {
+      "location": "Shkup, Maqedoni",
+      "phone": "+389 70 123 456",
+      "email": "hello@telemaxatomic.com",
+      "hours": "Hënë–Premte: 9:00–18:00"
+    },
+    "thankYou": {
+      "title": "Mesazhi u dërgua!",
+      "desc": "Faleminderit që na kontaktuat. Do t’ju kthejmë përgjigje brenda 24 orëve.",
+      "another": "Dërgo një mesazh tjetër"
+    }
+  },
+  "required": "është i detyrueshëm",
+  "invalidEmail": "Emaili nuk është i vlefshëm",
+  "minMessageLength": "Mesazhi duhet të ketë të paktën 10 karaktere",
+  "sending": "Duke dërguar...",
+  "submitFailed": "Dërgimi i mesazhit dështoi. Ju lutem provoni përsëri."
+}
+
