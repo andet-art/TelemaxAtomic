@@ -94,7 +94,7 @@ const Profile: React.FC = () => {
             <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
             <div className="space-y-3 text-sm text-zinc-800 dark:text-white/80">
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-primary" /
+                <Mail className="w-4 h-4 text-primary" />
 
 
                 {userData.email}
