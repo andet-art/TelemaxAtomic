@@ -1,4 +1,3 @@
-// src/controllers/orderController.js
 import db from '../config/db.js';
 import { getAllOrdersFromDB } from '../models/orderModel.js';
 
@@ -51,11 +50,29 @@ export const createOrder = async (req, res) => {
 
     // 3) Return updated list
     const [rows] = await getAllOrdersFromDB();
-    const parsed = rows.map(o => ({ ...o, items: JSON.parse(o.items) }));
+    const parsed = rows.map(o => {
+      let items = [];
+
+      if (Array.isArray(o.items)) {
+        items = o.items.filter(i => i !== null);
+      } else if (typeof o.items === 'string') {
+        try {
+          const parsedItems = JSON.parse(o.items);
+          if (Array.isArray(parsedItems)) {
+            items = parsedItems.filter(i => i !== null);
+          }
+        } catch (err) {
+          console.warn(`⚠️ Failed to parse items for order ${o.id}:`, err.message);
+        }
+      }
+
+      return { ...o, items };
+    });
+
     res.status(201).json(parsed);
 
   } catch (error) {
-    console.error('Error creating order:', error);
+    console.error('❌ Error creating order:', error.message);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -63,10 +80,29 @@ export const createOrder = async (req, res) => {
 export const getAllOrders = async (req, res) => {
   try {
     const [rows] = await getAllOrdersFromDB();
-    const parsed = rows.map(o => ({ ...o, items: JSON.parse(o.items) }));
+
+    const parsed = rows.map(o => {
+      let items = [];
+
+      if (Array.isArray(o.items)) {
+        items = o.items.filter(i => i !== null);
+      } else if (typeof o.items === 'string') {
+        try {
+          const parsedItems = JSON.parse(o.items);
+          if (Array.isArray(parsedItems)) {
+            items = parsedItems.filter(i => i !== null);
+          }
+        } catch (err) {
+          console.warn(`⚠️ Failed to parse items for order ${o.id}:`, err.message);
+        }
+      }
+
+      return { ...o, items };
+    });
+
     res.status(200).json(parsed);
   } catch (error) {
-    console.error('Error fetching orders:', error);
+    console.error('❌ Error fetching orders:', error.message);
     res.status(500).json({ error: 'Server error' });
   }
 };

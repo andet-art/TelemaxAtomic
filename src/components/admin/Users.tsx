@@ -3,11 +3,8 @@ import { motion } from 'framer-motion';
 import {
   Download,
   Search,
-  Edit,
+  Eye,
   X,
-  Check,
-  Trash2,
-  Eye
 } from 'lucide-react';
 
 type UserType = {
@@ -35,14 +32,10 @@ const Users: React.FC<Props> = ({ exportToCSV }) => {
   const [search, setSearch] = useState('');
   const [filterBy, setFilterBy] = useState<'all' | 'highSpenders' | 'frequentBuyers'>('all');
   const [selected, setSelected] = useState<Set<number>>(new Set());
-  const [editing, setEditing] = useState<number | null>(null);
-  const [editedName, setEditedName] = useState('');
-  const [editedEmail, setEditedEmail] = useState('');
   const [activities, setActivities] = useState<Activity[]>([]);
   const [showActFor, setShowActFor] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
-  // Fetch users
   useEffect(() => {
     async function loadUsers() {
       setLoading(true);
@@ -59,7 +52,6 @@ const Users: React.FC<Props> = ({ exportToCSV }) => {
     loadUsers();
   }, []);
 
-  // Fetch activities for a user
   async function loadActivities(userId: number) {
     try {
       const res = await fetch(`${API_BASE}/api/users/${userId}/activities`);
@@ -70,7 +62,6 @@ const Users: React.FC<Props> = ({ exportToCSV }) => {
     }
   }
 
-  // Apply search and filters
   const filtered = useMemo(() => {
     let result = users.filter(
       (u) =>
@@ -107,41 +98,12 @@ const Users: React.FC<Props> = ({ exportToCSV }) => {
     setSelected(newSel);
   }
 
-  async function handleDelete(id: number) {
-    if (!confirm('Delete this user?')) return;
-    try {
-      await fetch(`${API_BASE}/api/users/${id}`, { method: 'DELETE' });
-      setUsers(users.filter((u) => u.id !== id));
-    } catch (err) {
-      console.error('Delete failed', err);
-    }
-  }
-
-  async function handleSave(id: number) {
-    try {
-      await fetch(`${API_BASE}/api/users/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: editedName, email: editedEmail })
-      });
-      setUsers(
-        users.map((u) =>
-          u.id === id ? { ...u, name: editedName, email: editedEmail } : u
-        )
-      );
-      setEditing(null);
-    } catch (err) {
-      console.error('Update failed', err);
-    }
-  }
-
   if (loading) {
     return <div className="p-4 text-center">Loading users...</div>;
   }
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-      {/* Header + Export */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">User Management</h2>
         <button
@@ -152,7 +114,6 @@ const Users: React.FC<Props> = ({ exportToCSV }) => {
         </button>
       </div>
 
-      {/* Search + Filter */}
       <div className="flex gap-3 items-center">
         <div className="relative">
           <Search className="absolute left-2 top-2.5 text-gray-500" size={16} />
@@ -175,7 +136,6 @@ const Users: React.FC<Props> = ({ exportToCSV }) => {
         </select>
       </div>
 
-      {/* Users Table */}
       <div className="overflow-x-auto bg-white rounded-lg shadow">
         <table className="w-full text-sm">
           <thead>
@@ -200,75 +160,20 @@ const Users: React.FC<Props> = ({ exportToCSV }) => {
                     onChange={() => toggleSelect(u.id)}
                   />
                 </td>
-                <td className="p-2">
-                  {editing === u.id ? (
-                    <input
-                      className="border rounded px-2 py-1"
-                      value={editedName}
-                      onChange={(e) => setEditedName(e.target.value)}
-                    />
-                  ) : (
-                    u.name
-                  )}
-                </td>
-                <td className="p-2">
-                  {editing === u.id ? (
-                    <input
-                      className="border rounded px-2 py-1"
-                      value={editedEmail}
-                      onChange={(e) => setEditedEmail(e.target.value)}
-                    />
-                  ) : (
-                    u.email
-                  )}
-                </td>
+                <td className="p-2">{u.name}</td>
+                <td className="p-2">{u.email}</td>
                 <td className="p-2 text-right">{u.orderCount || 0}</td>
                 <td className="p-2 text-right">${u.totalSpent?.toFixed(2) || '0.00'}</td>
-                <td className="p-2 text-center flex justify-center gap-2">
-                  {editing === u.id ? (
-                    <>
-                      <button
-                        className="text-green-600"
-                        onClick={() => handleSave(u.id)}
-                      >
-                        <Check size={16} />
-                      </button>
-                      <button
-                        className="text-gray-500"
-                        onClick={() => setEditing(null)}
-                      >
-                        <X size={16} />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        className="text-blue-600"
-                        onClick={() => {
-                          setEditing(u.id);
-                          setEditedName(u.name);
-                          setEditedEmail(u.email);
-                        }}
-                      >
-                        <Edit size={16} />
-                      </button>
-                      <button
-                        className="text-purple-600"
-                        onClick={() => {
-                          setShowActFor(u.name);
-                          loadActivities(u.id);
-                        }}
-                      >
-                        <Eye size={16} />
-                      </button>
-                      <button
-                        className="text-red-600"
-                        onClick={() => handleDelete(u.id)}
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </>
-                  )}
+                <td className="p-2 text-center">
+                  <button
+                    className="text-purple-600"
+                    onClick={() => {
+                      setShowActFor(u.name);
+                      loadActivities(u.id);
+                    }}
+                  >
+                    <Eye size={16} />
+                  </button>
                 </td>
               </tr>
             ))}
@@ -276,7 +181,6 @@ const Users: React.FC<Props> = ({ exportToCSV }) => {
         </table>
       </div>
 
-      {/* Activity Modal */}
       {showActFor && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg max-w-lg w-full">
