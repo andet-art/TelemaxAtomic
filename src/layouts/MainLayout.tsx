@@ -1,17 +1,22 @@
-import React, { ReactNode } from 'react';
-import Navbar from '../components/Navbar';
+// src/layouts/MainLayout.tsx
+import React from 'react';
+import { Outlet } from 'react-router-dom';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
 
-interface MainLayoutProps {
-  children: ReactNode;
-}
-
-const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+const MainLayout: React.FC = () => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50 dark:bg-zinc-900">
+      {/* your navbar */}
       <Navbar />
-      <main className="pt-16">
-        {children}
+
+      {/* the page content */}
+      <main className="flex-1 pt-16">   {/* pt-16 if your navbar is fixed-height */}
+        <Outlet />
       </main>
+
+      {/* optional footer */}
+      <Footer />
     </div>
   );
 };
