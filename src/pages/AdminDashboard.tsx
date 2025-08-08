@@ -147,12 +147,13 @@ const AdminDashboard: React.FC = () => {
 
     // accumulate from real orders
     orders.forEach(o => {
-      const day = o.timestamp.split('T')[0];
-      if (map[day]) {
-        map[day].revenue += o.total;
-        map[day].orders += 1;
-      }
-    });
+  if (!o.timestamp) return;            // ← skip bad records
+  const day = o.timestamp.split('T')[0];
+  if (map[day]) {
+    map[day].revenue += o.total;
+    map[day].orders += 1;
+  }
+});
 
     // build array with avgOrderValue
     return Object.entries(map).map(([date, { revenue, orders }]) => ({
@@ -183,12 +184,26 @@ const AdminDashboard: React.FC = () => {
         oRes.json()
       ]);
 
-      setUsers(usersData);
-      setProducts(productsData);
-      setOrders(ordersData);
+      // normalize so timestamp is never undefined
+// after
+const normalizedOrders = (ordersData as any[]).map(o => ({
+  // pick whichever your API actually returns:
+  id: o.id ?? o.order_id ?? 0,
+  full_name: o.full_name ?? o.customer_name ?? '',
+  payment_method: o.payment_method ?? o.paymentMethod ?? '',
+  total: o.total ?? o.amount ?? 0,
+  items: o.items ?? o.orderItems ?? [],
+  status: o.status ?? 'completed',
+  timestamp: o.timestamp ?? o.created_at ?? ''
+}));
 
-      // compute real sales data
-      setSalesData(computeSalesData(ordersData));
+
+setUsers(usersData);
+setProducts(productsData);
+setOrders(normalizedOrders);
+
+// compute real sales data
+setSalesData(computeSalesData(normalizedOrders));
 
       // set date range: last 30 days
       const today = new Date();
@@ -1093,8 +1108,13 @@ const AdminDashboard: React.FC = () => {
               {orders.map(order => (
                 <tr key={order.id} className="border-t hover:bg-gray-50">
                   <td className="p-4">
-                    <span className="font-mono text-blue-600">#{order.id.toString().padStart(4, '0')}</span>
-                  </td>
+                    <span className="font-mono text-blue-600">
+                      {order.id
+                        ? `#${order.id.toString().padStart(4, '0')}`
+                        : '—'
+                      }
+                    </span>
+                     </td>
                   <td className="p-4">
                     <p className="font-medium">{order.full_name}</p>
                   </td>
@@ -1107,8 +1127,12 @@ const AdminDashboard: React.FC = () => {
                     <span className="font-bold text-green-600">{order.total.toFixed(0)} den</span>
                   </td>
                   <td className="p-4 text-gray-600">
-                    {new Date(order.timestamp).toLocaleDateString()}
-                  </td>
+  {order.timestamp
+    ? new Date(order.timestamp).toLocaleDateString('mk-MK')
+    : '—'
+  }
+</td>
+
                   <td className="p-4">
                     <span className="px-2 py-1 bg-green-100 text-green-800 text-sm rounded">
                       Completed

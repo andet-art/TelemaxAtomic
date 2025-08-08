@@ -1,3 +1,4 @@
+// controllers/orderController.js
 import db from '../config/db.js';
 import { getAllOrdersFromDB } from '../models/orderModel.js';
 
@@ -6,8 +7,7 @@ export const createOrder = async (req, res) => {
 
   try {
     const { customer, paymentMethod, items, summary, timestamp } = req.body;
-
-    if (!customer || !items || items.length === 0 || !summary || !paymentMethod) {
+    if (!customer || !items?.length || !summary || !paymentMethod) {
       return res.status(400).json({ error: 'Missing required order fields.' });
     }
 
@@ -41,18 +41,17 @@ export const createOrder = async (req, res) => {
     const orderId = orderResult.insertId;
 
     // 2) Insert each item for that order
-    const itemPromises = items.map(item =>
+    await Promise.all(items.map(item =>
       db.execute(
         `INSERT INTO order_items (order_id, product_id, quantity, price)
          VALUES (?, ?, ?, ?)`,
         [orderId, item.id, item.quantity, item.price]
       )
-    );
-    await Promise.all(itemPromises);
+    ));
 
     // 3) Fetch and return the updated list of orders
-    const allOrders = await getAllOrdersFromDB();
-    res.status(201).json(allOrders);
+    const [orders] = await getAllOrdersFromDB();
+    res.status(201).json(orders);
 
   } catch (error) {
     console.error('Error creating order:', error);
@@ -62,8 +61,8 @@ export const createOrder = async (req, res) => {
 
 export const getAllOrders = async (req, res) => {
   try {
-    const allOrders = await getAllOrdersFromDB();
-    res.status(200).json(allOrders);
+    const [orders] = await getAllOrdersFromDB();
+    res.status(200).json(orders);
   } catch (error) {
     console.error('Error fetching orders:', error);
     res.status(500).json({ error: 'Server error' });
