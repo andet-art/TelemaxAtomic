@@ -1,3 +1,4 @@
+// src/pages/Signin.tsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Eye, EyeOff, LogIn, ShieldCheck } from 'lucide-react';
@@ -5,38 +6,34 @@ import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 
-// Set the global base URL for all axios requests
+// Ensure baseURL is set
 axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const Signin: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [error, setError] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Signin attempt', { email, password });
     setError('');
     setLoading(true);
 
     try {
       const res = await axios.post('/api/users/signin', { email, password });
-      console.log('Signin response', res);
-
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user));
-      login(res.data.user);
+      // Persist user + token and wire up axios
+      login(res.data.user, res.data.token);
       navigate('/profile');
     } catch (err: any) {
       console.error('Signin error', err);
-      const msg =
+      setError(
         err.response?.data?.message ||
-        'Login failed. Please check your credentials and try again.';
-      setError(msg);
+          'Login failed. Please check your credentials and try again.'
+      );
     } finally {
       setLoading(false);
     }
@@ -59,12 +56,9 @@ const Signin: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Email Address
-              </label>
+              <label className="block text-sm font-medium mb-1">Email Address</label>
               <input
                 type="email"
-                name="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -74,13 +68,10 @@ const Signin: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium mb-1">
-                Password
-              </label>
+              <label className="block text-sm font-medium mb-1">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  name="password"
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -93,17 +84,18 @@ const Signin: React.FC = () => {
                   className="absolute right-3 top-3 text-muted-foreground"
                   aria-label="Toggle password visibility"
                 >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             </div>
 
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  className="form-checkbox rounded border-border text-primary"
-                />
+                <input type="checkbox" className="form-checkbox rounded border-border text-primary" />
                 Remember me
               </label>
               <Link to="/forgot-password" className="text-sm text-primary hover:underline">
