@@ -32,9 +32,10 @@ export const createOrder = async (req, res) => {
     // 1) Insert the order
     const [orderResult] = await db.execute(
       `INSERT INTO orders (
-        full_name, email, phone, address1, address2, city, postal_code, country,
-        payment_method, subtotal, tax, shipping, total, timestamp
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         full_name, email, phone,
+         address1, address2, city, postal_code, country,
+         payment_method, subtotal, tax, shipping, total, timestamp
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       orderValues
     );
     const orderId = orderResult.insertId;
@@ -55,6 +56,16 @@ export const createOrder = async (req, res) => {
 
   } catch (error) {
     console.error('Error creating order:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const getAllOrders = async (req, res) => {
+  try {
+    const allOrders = await getAllOrdersFromDB();
+    res.status(200).json(allOrders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
     res.status(500).json({ error: 'Server error' });
   }
 };
