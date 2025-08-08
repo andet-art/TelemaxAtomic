@@ -62,7 +62,6 @@ const Profile: React.FC = () => {
         <div className="absolute inset-0 bg-white/30 dark:bg-black/40 backdrop-blur-sm" />
         <div className="relative z-10 max-w-5xl mx-auto px-6 py-12 flex items-center gap-6">
           <img
-
             src={userData.avatar || 'https://i.pravatar.cc/150'}
             alt="User Avatar"
             className="w-24 h-24 rounded-full border-4 border-white dark:border-border shadow-xl"
@@ -80,7 +79,6 @@ const Profile: React.FC = () => {
               Log Out
             </button>
             <button className="px-3 py-2 text-sm bg-white text-black dark:bg-zinc-800 dark:text-white rounded-md hover:bg-white/90 dark:hover:bg-zinc-700 flex items-center gap-1">
-
               <Pencil className="w-4 h-4" />
               Edit Profile
             </button>
@@ -96,7 +94,8 @@ const Profile: React.FC = () => {
             <h2 className="text-xl font-semibold mb-4">Contact Information</h2>
             <div className="space-y-3 text-sm text-zinc-800 dark:text-white/80">
               <div className="flex items-center gap-3">
-                <Mail className="w-4 h-4 text-primary" />
+                <Mail className="w-4 h-4 text-primary" /
+
 
                 {userData.email}
               </div>
