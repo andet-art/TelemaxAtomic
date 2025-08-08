@@ -90,39 +90,58 @@ const Orders: React.FC = () => {
 
   // load products & models
   useEffect(() => {
-    async function load() {
-      setLoading(true);
-      try {
-        const [pRes, mRes] = await Promise.all([
-          fetch(`${API_BASE}/api/products`),
-          fetch(`${API_BASE}/api/models`)
-        ]);
-        if (!pRes.ok) throw new Error(`Products: ${pRes.status}`);
-        if (!mRes.ok) throw new Error(`Models: ${mRes.status}`);
-        
-        // Mock additional product data for demonstration
-        const productsData = await pRes.json();
-        const enhancedProducts = productsData.map((product: Product) => ({
-          ...product,
-          colors: ['Black', 'White', 'Silver', 'Blue', 'Red'].slice(0, Math.floor(Math.random() * 3) + 2),
-          sizes: ['S', 'M', 'L', 'XL'].slice(0, Math.floor(Math.random() * 2) + 2),
+  async function load() {
+    setLoading(true);
+    try {
+      const [pRes, mRes] = await Promise.all([
+        fetch(`${API_BASE}/api/products`),
+        fetch(`${API_BASE}/api/models`)
+      ]);
+      if (!pRes.ok) throw new Error(`Products: ${pRes.status}`);
+      if (!mRes.ok) throw new Error(`Models: ${mRes.status}`);
+
+      const productsData: Product[] = await pRes.json();
+      const modelsData = await mRes.json();
+
+      const enhancedProducts = productsData.map(product => {
+        // 1. Grab whatever your API gave you (might be undefined or empty)
+        const incoming = Array.isArray(product.photos) ? product.photos : [];
+
+        // 2. If that array is empty, use your test fallback
+        const rawPhotos = incoming.length
+          ? incoming
+          : ['assets/products/test.png'];
+
+        // 3. Prepend API_BASE to any relative path
+        const photos = rawPhotos.map(p =>
+          p.startsWith('http') ? p : `${API_BASE}/${p}`
+        );
+
+        return {
+          ...product,       // keep id, name, description, etc.
+          photos,           // override (or inject) our new full‐URL array
+          colors: ['Black', 'White', 'Silver', 'Blue', 'Red']
+            .slice(0, Math.floor(Math.random() * 3) + 2),
+          sizes: ['S', 'M', 'L', 'XL']
+            .slice(0, Math.floor(Math.random() * 2) + 2),
           available_models: [
             { id: 1, name: 'Standard', price_modifier: 0 },
-            { id: 2, name: 'Pro', price_modifier: 50 },
-            { id: 3, name: 'Premium', price_modifier: 100 }
+            { id: 2, name: 'Pro',      price_modifier: 50 },
+            { id: 3, name: 'Premium',  price_modifier: 100 }
           ].slice(0, Math.floor(Math.random() * 2) + 1)
-        }));
-        
-        setProducts(enhancedProducts);
-        setModels(await mRes.json());
-      } catch (e: any) {
-        setError(e.message);
-      } finally {
-        setLoading(false);
-      }
+        };
+      });
+
+      setProducts(enhancedProducts);
+      setModels(modelsData);
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
     }
-    load();
-  }, []);
+  }
+  load();
+}, []);
 
   // reset page when filters change
   useEffect(() => { setCurrentPage(1); }, [selectedCategory, selectedModel, searchTerm]);
@@ -331,6 +350,7 @@ const Orders: React.FC = () => {
                 const photoUrl = prod.photos?.length
                 ? `${API_BASE}/${prod.photos[0]}`
                 : PLACEHOLDER_IMG;
+
                 return (
                   <div key={prod.id} className="border border-gray-200 dark:border-gray-700 
                                                  bg-white dark:bg-gray-800 
