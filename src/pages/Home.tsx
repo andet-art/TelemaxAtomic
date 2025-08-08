@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
-import heroBackground from '@/assets/hero-background.jpg';
+import heroBackground from '@/assets/backgorunndphotohome.png';
 
 const sampleProducts = [
   {
