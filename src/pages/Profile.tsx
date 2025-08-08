@@ -1,3 +1,4 @@
+
 // src/pages/Profile.tsx
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -94,6 +95,8 @@ const Profile: React.FC = () => {
             <div className="space-y-3 text-sm text-zinc-800 dark:text-white/80">
               <div className="flex items-center gap-3">
                 <Mail className="w-4 h-4 text-primary" />
+
+
                 {userData.email}
               </div>
               <div className="flex items-center gap-3">
@@ -125,6 +128,7 @@ const Profile: React.FC = () => {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             {[
+
               {
                 icon: ShoppingBag,
                 label: 'Orders',
@@ -149,6 +153,7 @@ const Profile: React.FC = () => {
                 value: userData.addresses || 0,
                 bg: 'from-cyan-300 to-cyan-500 dark:from-cyan-600 dark:to-cyan-800',
               },
+
             ].map(({ icon: Icon, label, value, bg }, i) => (
               <div
                 key={i}
