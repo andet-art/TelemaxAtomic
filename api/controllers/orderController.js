@@ -12,7 +12,6 @@ export const createOrder = async (req, res) => {
     }
 
     const formattedTimestamp = timestamp.replace('T', ' ').replace('Z', '');
-
     const orderValues = [
       customer.fullName,
       customer.email,
@@ -30,6 +29,7 @@ export const createOrder = async (req, res) => {
       formattedTimestamp,
     ];
 
+    // 1) Insert the order
     const [orderResult] = await db.execute(
       `INSERT INTO orders (
         full_name, email, phone, address1, address2, city, postal_code, country,
@@ -37,9 +37,24 @@ export const createOrder = async (req, res) => {
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       orderValues
     );
-
     const orderId = orderResult.insertId;
 
-    const itemInserts = items.map((item) => {
-      return db.execute(
+    // 2) Insert each item for that order
+    const itemPromises = items.map(item =>
+      db.execute(
         `INSERT INTO order_items (order_id, product_id, quantity, price)
+         VALUES (?, ?, ?, ?)`,
+        [orderId, item.id, item.quantity, item.price]
+      )
+    );
+    await Promise.all(itemPromises);
+
+    // 3) Fetch and return the updated list of orders
+    const allOrders = await getAllOrdersFromDB();
+    res.status(201).json(allOrders);
+
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
