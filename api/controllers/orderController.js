@@ -1,3 +1,5 @@
+// src/controllers/orderController.js
+
 import db from '../config/db.js';
 import { getAllOrdersFromDB } from '../models/orderModel.js';
 
@@ -51,58 +53,80 @@ export const createOrder = async (req, res) => {
     // 3) Return updated list
     const [rows] = await getAllOrdersFromDB();
     const parsed = rows.map(o => {
-      let items = [];
-
-      if (Array.isArray(o.items)) {
-        items = o.items.filter(i => i !== null);
-      } else if (typeof o.items === 'string') {
+      let itemsArr = [];
+      if (o.items_concat) {
         try {
-          const parsedItems = JSON.parse(o.items);
-          if (Array.isArray(parsedItems)) {
-            items = parsedItems.filter(i => i !== null);
-          }
-        } catch (err) {
-          console.warn(`⚠️ Failed to parse items for order ${o.id}:`, err.message);
+          itemsArr = JSON.parse('[' + o.items_concat + ']');
+        } catch (e) {
+          console.warn(`⚠️ Failed to parse items for order ${o.id}`, e);
         }
       }
-
-      return { ...o, items };
+      return {
+        id:            o.id,
+        fullName:      o.fullName,
+        email:         o.email,
+        phone:         o.phone,
+        address1:      o.address1,
+        address2:      o.address2,
+        city:          o.city,
+        postalCode:    o.postalCode,
+        country:       o.country,
+        paymentMethod: o.paymentMethod,
+        subtotal:      o.subtotal,
+        tax:           o.tax,
+        shipping:      o.shipping,
+        total:         o.total,
+        timestamp:     o.timestamp,
+        items:         itemsArr,
+      };
     });
 
     res.status(201).json(parsed);
-
   } catch (error) {
-    console.error('❌ Error creating order:', error.message);
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Error creating order:', error);
+    // include the real error message for debugging
+    res.status(500).json({ error: 'Server error', detail: error.message });
   }
 };
 
 export const getAllOrders = async (req, res) => {
   try {
     const [rows] = await getAllOrdersFromDB();
-
     const parsed = rows.map(o => {
-      let items = [];
-
-      if (Array.isArray(o.items)) {
-        items = o.items.filter(i => i !== null);
-      } else if (typeof o.items === 'string') {
+      let itemsArr = [];
+      if (o.items_concat) {
         try {
-          const parsedItems = JSON.parse(o.items);
-          if (Array.isArray(parsedItems)) {
-            items = parsedItems.filter(i => i !== null);
-          }
-        } catch (err) {
-          console.warn(`⚠️ Failed to parse items for order ${o.id}:`, err.message);
+          itemsArr = JSON.parse('[' + o.items_concat + ']');
+        } catch (e) {
+          console.warn(`⚠️ Failed to parse items for order ${o.id}`, e);
         }
       }
-
-      return { ...o, items };
+      return {
+        id:            o.id,
+        fullName:      o.fullName,
+        email:         o.email,
+        phone:         o.phone,
+        address1:      o.address1,
+        address2:      o.address2,
+        city:          o.city,
+        postalCode:    o.postalCode,
+        country:       o.country,
+        paymentMethod: o.paymentMethod,
+        subtotal:      o.subtotal,
+        tax:           o.tax,
+        shipping:      o.shipping,
+        total:         o.total,
+        timestamp:     o.timestamp,
+        items:         itemsArr,
+      };
     });
-
     res.status(200).json(parsed);
   } catch (error) {
-    console.error('❌ Error fetching orders:', error.message);
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Full error fetching orders:', error);
+    // DEBUG: send actual error for troubleshooting
+    res.status(500).json({
+      error: error.message,
+      stack: error.stack?.split('\n').slice(0, 5)
+    });
   }
 };
