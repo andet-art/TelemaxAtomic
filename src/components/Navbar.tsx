@@ -6,12 +6,33 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { cn } from '@/lib/utils';
 
 const useLang = () => {
-  const [lang, setLang] = useState<'en' | 'mk' | 'al'>('en');
+  // Initialize with stored language or default to 'en'
+  const [lang, setLang] = useState<'en' | 'mk' | 'al'>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = sessionStorage.getItem('telemax-language');
+      return (stored as 'en' | 'mk' | 'al') || 'en';
+    }
+    return 'en';
+  });
+
   const toggleLanguage = () => {
     const languages: ('en' | 'mk' | 'al')[] = ['en', 'mk', 'al'];
     const currentIndex = languages.indexOf(lang);
     const nextIndex = (currentIndex + 1) % languages.length;
-    setLang(languages[nextIndex]);
+    const newLang = languages[nextIndex];
+    setLang(newLang);
+    
+    // Persist language selection
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('telemax-language', newLang);
+    }
+  };
+
+  const setLanguage = (newLang: 'en' | 'mk' | 'al') => {
+    setLang(newLang);
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('telemax-language', newLang);
+    }
   };
 
   const translations: Record<string, Record<string, string>> = {
@@ -30,7 +51,7 @@ const useLang = () => {
   };
 
   const t = (key: string) => translations[lang][key] || key;
-  return { lang, toggleLanguage, t };
+  return { lang, toggleLanguage, setLanguage, t };
 };
 
 // Enhanced useAuth hook with proper authentication state management
@@ -68,7 +89,7 @@ const useAuth = () => {
   return { user, isAuthenticated, login, logout };
 };
 
-// Professional floating orb with sophisticated colors
+// Professional floating orb with sophisticated colors - theme compatible
 const FloatingOrb = ({ mousePosition }: { mousePosition: { x: number; y: number } }) => (
   <div 
     className="absolute pointer-events-none transition-all duration-[2500ms] ease-out opacity-6 hidden 2xl:block"
@@ -83,7 +104,7 @@ const FloatingOrb = ({ mousePosition }: { mousePosition: { x: number; y: number 
   </div>
 );
 
-// Professional floating indicator with sophisticated styling
+// Professional floating indicator with sophisticated styling - theme compatible
 const FloatingIndicator = ({ activeIndex, links }: { activeIndex: number; links: any[] }) => {
   if (activeIndex === -1) return null;
   
@@ -95,8 +116,8 @@ const FloatingIndicator = ({ activeIndex, links }: { activeIndex: number; links:
         width: `${100 / links.length}%`,
       }}
     >
-      {/* Professional gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-r from-slate-800/80 via-slate-700/90 to-slate-800/80" />
+      {/* Professional gradient background - theme compatible */}
+      <div className="absolute inset-0 bg-gradient-to-r from-slate-800/80 via-slate-700/90 to-slate-800/80 dark:from-slate-700/80 dark:via-slate-600/90 dark:to-slate-700/80" />
       <div className="absolute inset-0 bg-gradient-to-r from-amber-700/10 via-orange-700/15 to-red-800/10" />
       <div className="absolute inset-0 bg-gradient-to-b from-white/3 via-transparent to-white/3" />
       
@@ -114,7 +135,7 @@ const FloatingIndicator = ({ activeIndex, links }: { activeIndex: number; links:
 };
 
 const Navbar = () => {
-  const { lang, toggleLanguage, t } = useLang();
+  const { lang, toggleLanguage, setLanguage, t } = useLang();
   const { user, isAuthenticated, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const [shrink, setShrink] = useState(false);
@@ -222,23 +243,23 @@ const Navbar = () => {
           transform: shrink ? 'scale(0.98)' : 'scale(1)',
         }}
       >
-        {/* Professional glassmorphism background */}
+        {/* Professional glassmorphism background - theme compatible */}
         <div className="absolute inset-0 overflow-hidden">
-          {/* Enhanced glass layers with professional colors */}
+          {/* Enhanced glass layers with professional colors - theme compatible */}
           <div className="absolute inset-0 bg-white/[0.01] backdrop-blur-3xl" />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/96 via-slate-900/94 to-slate-950/96" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/96 via-slate-900/94 to-slate-950/96 dark:from-slate-950/98 dark:via-slate-900/96 dark:to-slate-950/98" />
           <div className="absolute inset-0 bg-gradient-to-b from-slate-800/4 via-transparent to-slate-800/4" />
           
           {/* Mouse-following gradient orb */}
           <FloatingOrb mousePosition={mousePosition} />
           
-          {/* Professional animated mesh gradient */}
+          {/* Professional animated mesh gradient - theme compatible */}
           <div className="absolute inset-0 opacity-4">
             <div className="absolute top-0 left-1/5 w-48 h-48 bg-gradient-to-r from-amber-700 via-orange-700 to-red-800 rounded-full blur-3xl animate-float" />
             <div className="absolute top-0 right-1/5 w-48 h-48 bg-gradient-to-r from-slate-600 via-slate-700 to-slate-800 rounded-full blur-3xl animate-float-delayed" />
           </div>
           
-          {/* Enhanced border gradients */}
+          {/* Enhanced border gradients - theme compatible */}
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/12 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-slate-600/20 to-transparent" />
         </div>
@@ -289,7 +310,7 @@ const Navbar = () => {
 
           {/* Professional Desktop Navigation */}
           <nav className="hidden lg:flex">
-            <div className="relative bg-slate-900/50 backdrop-blur-2xl rounded-2xl p-1 border border-slate-700/40 shadow-2xl shadow-slate-900/25">
+            <div className="relative bg-slate-900/50 dark:bg-slate-800/50 backdrop-blur-2xl rounded-2xl p-1 border border-slate-700/40 dark:border-slate-600/40 shadow-2xl shadow-slate-900/25">
               <FloatingIndicator activeIndex={activeIndex} links={links} />
               
               <div className="relative flex items-center">
@@ -303,7 +324,7 @@ const Navbar = () => {
                       "relative px-4 lg:px-6 xl:px-8 py-2 lg:py-2.5 rounded-xl font-semibold transition-all duration-500 flex items-center gap-2 lg:gap-2.5 group z-10",
                       location.pathname === to
                         ? "text-white"
-                        : "text-slate-300 hover:text-white"
+                        : "text-slate-300 hover:text-white dark:text-slate-200 dark:hover:text-white"
                     )}
                   >
                     <Icon className="w-4 h-4 lg:w-4.5 lg:h-4.5 transition-all duration-500 group-hover:scale-110 group-hover:rotate-3" />
@@ -331,8 +352,8 @@ const Navbar = () => {
                 onClick={() => setShowLangDropdown(!showLangDropdown)}
                 onMouseEnter={() => setShowLangDropdown(true)}
                 className={cn(
-                  "gap-2 bg-slate-800/40 hover:bg-slate-700/50 border border-slate-600/40 hover:border-slate-500/50 text-slate-200 hover:text-white transition-all duration-300 backdrop-blur-2xl px-3 lg:px-5 xl:px-6 py-1.5 lg:py-2 rounded-xl relative overflow-hidden group",
-                  showLangDropdown && "bg-slate-700/50 border-slate-500/50 text-white"
+                  "gap-2 bg-slate-800/40 hover:bg-slate-700/50 border border-slate-600/40 hover:border-slate-500/50 text-slate-200 hover:text-white transition-all duration-300 backdrop-blur-2xl px-3 lg:px-5 xl:px-6 py-1.5 lg:py-2 rounded-xl relative overflow-hidden group dark:bg-slate-700/40 dark:hover:bg-slate-600/50 dark:border-slate-500/40 dark:hover:border-slate-400/50 dark:text-slate-100",
+                  showLangDropdown && "bg-slate-700/50 border-slate-500/50 text-white dark:bg-slate-600/50 dark:border-slate-400/50"
                 )}
               >
                 {/* Button background glow */}
@@ -357,11 +378,11 @@ const Navbar = () => {
                 )}
                 onMouseLeave={() => setShowLangDropdown(false)}
               >
-                {/* Dropdown container with professional styling */}
-                <div className="bg-slate-900/98 backdrop-blur-3xl rounded-2xl border border-slate-700/60 shadow-2xl shadow-slate-900/50 overflow-hidden">
+                {/* Dropdown container with professional styling - theme compatible */}
+                <div className="bg-slate-900/98 dark:bg-slate-800/98 backdrop-blur-3xl rounded-2xl border border-slate-700/60 dark:border-slate-600/60 shadow-2xl shadow-slate-900/50 overflow-hidden">
                   {/* Professional header */}
-                  <div className="px-4 py-2 border-b border-slate-700/40 bg-slate-800/25">
-                    <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Language</span>
+                  <div className="px-4 py-2 border-b border-slate-700/40 dark:border-slate-600/40 bg-slate-800/25 dark:bg-slate-700/25">
+                    <span className="text-xs font-semibold text-slate-400 dark:text-slate-300 uppercase tracking-wider">Language</span>
                   </div>
                   
                   {/* Language options */}
@@ -370,14 +391,14 @@ const Navbar = () => {
                       <button
                         key={langCode}
                         onClick={() => {
-                          if (langCode !== lang) toggleLanguage();
+                          setLanguage(langCode as 'en' | 'mk' | 'al');
                           setShowLangDropdown(false);
                         }}
                         className={cn(
                           "w-full px-4 py-3 text-left transition-all duration-200 flex items-center gap-4 font-medium text-sm relative group",
                           langCode === lang 
                             ? "bg-gradient-to-r from-amber-700/10 via-orange-700/10 to-red-800/10 text-white border-l-2 border-amber-600/60" 
-                            : "text-slate-200 hover:text-white hover:bg-slate-800/50"
+                            : "text-slate-200 hover:text-white hover:bg-slate-800/50 dark:text-slate-100 dark:hover:text-white dark:hover:bg-slate-700/50"
                         )}
                         style={{ 
                           animationDelay: `${index * 50}ms`,
@@ -391,7 +412,7 @@ const Navbar = () => {
                         <span className="text-xl relative z-10">{flag}</span>
                         <div className="flex flex-col relative z-10">
                           <span className="font-semibold">{labels[langCode as keyof typeof labels]}</span>
-                          <span className="text-xs text-slate-400 font-normal">
+                          <span className="text-xs text-slate-400 dark:text-slate-300 font-normal">
                             {langCode === 'en' ? 'English' : langCode === 'mk' ? 'Македонски' : 'Shqip'}
                           </span>
                         </div>
@@ -422,13 +443,13 @@ const Navbar = () => {
                 <Button 
                   variant="ghost"
                   onClick={() => navigateToPage('/profile')}
-                  className="gap-2 bg-slate-800/40 hover:bg-slate-700/50 border border-slate-600/40 hover:border-slate-500/50 text-slate-200 hover:text-white transition-all duration-300 backdrop-blur-2xl px-3 lg:px-5 xl:px-6 py-1.5 lg:py-2 rounded-xl text-sm font-semibold group relative overflow-hidden"
+                  className="gap-2 bg-slate-800/40 hover:bg-slate-700/50 border border-slate-600/40 hover:border-slate-500/50 text-slate-200 hover:text-white transition-all duration-300 backdrop-blur-2xl px-3 lg:px-5 xl:px-6 py-1.5 lg:py-2 rounded-xl text-sm font-semibold group relative overflow-hidden dark:bg-slate-700/40 dark:hover:bg-slate-600/50 dark:border-slate-500/40 dark:hover:border-slate-400/50 dark:text-slate-100"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-amber-700/3 via-orange-700/5 to-red-800/3 opacity-0 group-hover:opacity-100 transition-all duration-300" />
                   <User className="w-4 h-4 lg:w-4.5 lg:h-4.5 relative z-10 transition-all duration-300 group-hover:scale-110" />
                   <span className="hidden lg:inline relative z-10">{t('profile')}</span>
                   {user?.name && (
-                    <span className="hidden xl:inline text-xs text-slate-400 ml-1">
+                    <span className="hidden xl:inline text-xs text-slate-400 dark:text-slate-300 ml-1">
                       {user.name.split(' ')[0]}
                     </span>
                   )}
@@ -440,7 +461,7 @@ const Navbar = () => {
                 <Button 
                   variant="outline"
                   onClick={() => navigateToPage('/signin')}
-                  className="bg-slate-800/40 hover:bg-slate-700/50 border-slate-600/40 hover:border-slate-500/50 text-slate-200 hover:text-white transition-all duration-300 backdrop-blur-2xl px-4 lg:px-6 xl:px-8 py-1.5 lg:py-2 rounded-xl text-sm font-semibold min-w-[80px] lg:min-w-[100px] group relative overflow-hidden"
+                  className="bg-slate-800/40 hover:bg-slate-700/50 border-slate-600/40 hover:border-slate-500/50 text-slate-200 hover:text-white transition-all duration-300 backdrop-blur-2xl px-4 lg:px-6 xl:px-8 py-1.5 lg:py-2 rounded-xl text-sm font-semibold min-w-[80px] lg:min-w-[100px] group relative overflow-hidden dark:bg-slate-700/40 dark:hover:bg-slate-600/50 dark:border-slate-500/40 dark:hover:border-slate-400/50 dark:text-slate-100"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-slate-600/8 via-slate-500/12 to-slate-600/8 opacity-0 group-hover:opacity-100 transition-all duration-300" />
                   <span className="relative z-10">{t('signin')}</span>
@@ -462,15 +483,15 @@ const Navbar = () => {
           <div className="xl:hidden">
             <button
               onClick={() => setOpen(!open)}
-              className="relative p-1.5 sm:p-2 rounded-lg bg-slate-800/40 border border-slate-600/40 hover:bg-slate-700/50 transition-all duration-500 backdrop-blur-2xl"
+              className="relative p-1.5 sm:p-2 rounded-lg bg-slate-800/40 border border-slate-600/40 hover:bg-slate-700/50 transition-all duration-500 backdrop-blur-2xl dark:bg-slate-700/40 dark:border-slate-500/40 dark:hover:bg-slate-600/50"
             >
               <div className="relative w-5 h-5 sm:w-5.5 sm:h-5.5">
                 <Menu className={cn(
-                  "absolute inset-0 text-slate-200 transition-all duration-500",
+                  "absolute inset-0 text-slate-200 dark:text-slate-100 transition-all duration-500",
                   open ? "opacity-0 rotate-180 scale-75" : "opacity-100 rotate-0 scale-100"
                 )} />
                 <X className={cn(
-                  "absolute inset-0 text-slate-200 transition-all duration-500",
+                  "absolute inset-0 text-slate-200 dark:text-slate-100 transition-all duration-500",
                   open ? "opacity-100 rotate-0 scale-100" : "opacity-0 -rotate-180 scale-75"
                 )} />
               </div>
@@ -484,17 +505,17 @@ const Navbar = () => {
         "fixed inset-0 z-50 xl:hidden transition-all duration-700 ease-out",
         open ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
       )}>
-        {/* Professional background */}
-        <div className="absolute inset-0 bg-slate-950/98 backdrop-blur-3xl">
+        {/* Professional background - theme compatible */}
+        <div className="absolute inset-0 bg-slate-950/98 dark:bg-slate-900/98 backdrop-blur-3xl">
           {/* Professional animated gradient background */}
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-950/20 via-slate-900 to-red-950/20" />
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-950/20 via-slate-900 to-red-950/20 dark:from-amber-950/15 dark:via-slate-800 dark:to-red-950/15" />
           <div className="absolute top-1/4 left-1/4 w-56 h-56 bg-gradient-to-r from-amber-700/8 via-orange-700/8 to-red-800/8 rounded-full blur-3xl animate-float" />
           <div className="absolute bottom-1/4 right-1/4 w-56 h-56 bg-gradient-to-r from-slate-600/8 via-slate-700/8 to-slate-800/8 rounded-full blur-3xl animate-float-delayed" />
         </div>
         
         <div className="relative h-full flex flex-col">
           {/* Mobile header */}
-          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-700/40">
+          <div className="flex items-center justify-between p-3 sm:p-4 border-b border-slate-700/40 dark:border-slate-600/40">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 sm:w-9 sm:h-9 bg-gradient-to-br from-amber-600 via-orange-700 to-red-800 rounded-lg flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-sm">T</span>
@@ -503,9 +524,9 @@ const Navbar = () => {
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="p-1.5 rounded-lg hover:bg-slate-800/40 transition-colors duration-300"
+              className="p-1.5 rounded-lg hover:bg-slate-800/40 dark:hover:bg-slate-700/40 transition-colors duration-300"
             >
-              <X className="w-5 h-5 sm:w-5.5 sm:h-5.5 text-slate-200" />
+              <X className="w-5 h-5 sm:w-5.5 sm:h-5.5 text-slate-200 dark:text-slate-100" />
             </button>
           </div>
 
@@ -519,7 +540,7 @@ const Navbar = () => {
                   "flex items-center gap-3.5 sm:gap-4 p-3.5 sm:p-4 rounded-xl font-semibold transition-all duration-700 group text-left border",
                   location.pathname === to
                     ? "bg-gradient-to-r from-amber-700/8 via-orange-700/8 to-red-800/8 text-white border-amber-600/25 shadow-lg shadow-amber-700/6"
-                    : "text-slate-300 hover:text-white hover:bg-slate-800/25 border-slate-700/25 hover:border-slate-600/40"
+                    : "text-slate-300 hover:text-white hover:bg-slate-800/25 border-slate-700/25 hover:border-slate-600/40 dark:text-slate-200 dark:hover:text-white dark:hover:bg-slate-700/25 dark:border-slate-600/25 dark:hover:border-slate-500/40"
                 )}
                 style={{ 
                   animationDelay: `${index * 120}ms`,
@@ -534,9 +555,9 @@ const Navbar = () => {
           </div>
 
           {/* Mobile actions */}
-          <div className="p-3 sm:p-4 space-y-2.5 sm:space-y-3 border-t border-slate-700/40">
+          <div className="p-3 sm:p-4 space-y-2.5 sm:space-y-3 border-t border-slate-700/40 dark:border-slate-600/40">
             {/* Theme Toggle for Mobile */}
-            <div className="flex items-center justify-center">
+            <div className="flex items-center justify-center py-2">
               <ThemeToggle />
             </div>
 
@@ -544,7 +565,7 @@ const Navbar = () => {
             <Button 
               variant="ghost" 
               onClick={toggleLanguage} 
-              className="w-full h-11 sm:h-12 bg-slate-800/40 hover:bg-slate-700/50 border border-slate-600/40 text-slate-200 hover:text-white text-base font-semibold rounded-xl gap-3"
+              className="w-full h-11 sm:h-12 bg-slate-800/40 hover:bg-slate-700/50 border border-slate-600/40 text-slate-200 hover:text-white text-base font-semibold rounded-xl gap-3 dark:bg-slate-700/40 dark:hover:bg-slate-600/50 dark:border-slate-500/40 dark:text-slate-100 dark:hover:text-white"
             >
               <Globe className="w-4.5 h-4.5" />
               <span>{flags[lang]} {labels[lang]}</span>
@@ -556,12 +577,12 @@ const Navbar = () => {
               <Button 
                 variant="outline" 
                 onClick={() => navigateToPage('/profile')} 
-                className="w-full h-11 sm:h-12 bg-slate-800/40 border-slate-600/40 text-slate-200 hover:text-white text-base font-semibold rounded-xl gap-3"
+                className="w-full h-11 sm:h-12 bg-slate-800/40 border-slate-600/40 text-slate-200 hover:text-white text-base font-semibold rounded-xl gap-3 dark:bg-slate-700/40 dark:border-slate-500/40 dark:text-slate-100 dark:hover:text-white"
               >
                 <User className="w-4.5 h-4.5" />
                 {t('profile')}
                 {user?.name && (
-                  <span className="text-sm text-slate-400 ml-auto">
+                  <span className="text-sm text-slate-400 dark:text-slate-300 ml-auto">
                     {user.name.split(' ')[0]}
                   </span>
                 )}
@@ -572,7 +593,7 @@ const Navbar = () => {
                 <Button 
                   variant="outline" 
                   onClick={() => navigateToPage('/signin')}
-                  className="w-full h-11 sm:h-12 bg-slate-800/40 border-slate-600/40 text-slate-200 hover:text-white text-base font-semibold rounded-xl"
+                  className="w-full h-11 sm:h-12 bg-slate-800/40 border-slate-600/40 text-slate-200 hover:text-white text-base font-semibold rounded-xl dark:bg-slate-700/40 dark:border-slate-500/40 dark:text-slate-100 dark:hover:text-white"
                 >
                   {t('signin')}
                 </Button>
