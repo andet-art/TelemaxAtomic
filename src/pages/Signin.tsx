@@ -1,17 +1,18 @@
-// src/pages/Signin.tsx
 import React, { useState } from 'react';
 import axios from 'axios';
 import { Eye, EyeOff, LogIn, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext'; // ✅ Import context
 
 const Signin: React.FC = () => {
   const navigate = useNavigate();
-  const [email, setEmail]               = useState<string>('');
-  const [password, setPassword]         = useState<string>('');
+  const { login } = useAuth(); // ✅ Use context
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [error, setError]               = useState<string>('');
-  const [loading, setLoading]           = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +27,14 @@ const Signin: React.FC = () => {
         { headers: { 'Content-Type': 'application/json' } }
       );
 
+      // ✅ Save token & user object to localStorage
       localStorage.setItem('token', res.data.token);
-      navigate('/');
+      localStorage.setItem('user', JSON.stringify(res.data.user)); // ✅ Properly store user
+      login(res.data.user); // ✅ Pass user to context
+
+      // ✅ Redirect to profile
+      navigate('/profile');
+
     } catch (err: any) {
       const msg =
         err.response?.data?.message ||

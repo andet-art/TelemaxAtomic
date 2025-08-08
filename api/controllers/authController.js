@@ -23,9 +23,19 @@ export const register = async (req, res, next) => {
       password: hashedPassword,
     });
 
-    const token = generateToken({ id, is_admin: false });
+    const token = generateToken({ id, email });
 
-    res.status(201).json({ id, email, token });
+    // Return the newly created user (without password)
+    res.status(201).json({
+      token,
+      user: {
+        id,
+        first_name,
+        last_name,
+        email,
+        role: 'user', // optional if you have role field
+      },
+    });
   } catch (err) {
     next(err);
   }
@@ -51,7 +61,13 @@ export const login = async (req, res, next) => {
 
     const token = generateToken(user);
 
-    res.json({ id: user.id, email: user.email, token });
+    // Strip password before returning user
+    const { password: _, ...userWithoutPassword } = user;
+
+    res.json({
+      token,
+      user: userWithoutPassword,
+    });
   } catch (err) {
     next(err);
   }

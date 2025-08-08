@@ -1,8 +1,14 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from '../config/config.js';
-import { createUser, findUserByEmail, getAllUsersFromDB } from '../models/userModel.js';
+import {
+  createUser,
+  findUserByEmail,
+  getAllUsersFromDB,
+  findUserById,
+} from '../models/userModel.js';
 
+// Signup
 export const signup = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -17,6 +23,7 @@ export const signup = async (req, res) => {
   res.status(201).json({ token });
 };
 
+// Signin
 export const signin = async (req, res) => {
   const { email, password } = req.body;
 
@@ -28,10 +35,10 @@ export const signin = async (req, res) => {
 
   const token = jwt.sign({ id: user.id, email }, config.jwtSecret, { expiresIn: '7d' });
 
-  res.json({ token });
+  res.json({ token, user }); // Optionally return full user here too
 };
 
-// ✅ New
+// Get all users
 export const getAllUsers = async (req, res) => {
   try {
     const users = await getAllUsersFromDB();
@@ -39,5 +46,19 @@ export const getAllUsers = async (req, res) => {
   } catch (err) {
     console.error('Error fetching users:', err.message);
     res.status(500).json({ error: 'Failed to fetch users' });
+  }
+};
+
+// Get user by ID (used in Profile)
+export const getUserById = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await findUserById(id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json(user);
+  } catch (err) {
+    console.error('Error fetching user by ID:', err.message);
+    res.status(500).json({ error: 'Failed to fetch user' });
   }
 };

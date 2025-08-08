@@ -1,4 +1,3 @@
-// src/App.tsx
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -12,15 +11,15 @@ import { AuthProvider } from "./context/AuthContext";
 import MainLayout from "./layouts/MainLayout";
 
 // pages
-import Home    from "./pages/Home";
-import About   from "./pages/About";
-import Orders  from "./pages/Orders";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Orders from "./pages/Orders";
 import Contact from "./pages/Contact";
 import Profile from "./pages/Profile";
-import Cart    from "./pages/Cart";
+import Cart from "./pages/Cart";
 
 import SignIn from "./pages/SignIn";
-import Join   from "./pages/Join";
+import Join from "./pages/Join";
 import NotFound from "./pages/NotFound";
 import Checkout from "./pages/Checkout";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -39,7 +38,7 @@ function App() {
               <Routes>
                 {/* auth pages: no navbar */}
                 <Route path="/signin" element={<SignIn />} />
-                <Route path="/join"   element={<Join />} />
+                <Route path="/join" element={<Join />} />
 
                 {/* all other pages: wrapped in MainLayout (with Navbar) */}
                 <Route
@@ -92,14 +91,13 @@ function App() {
                 />
                 <Route path="/checkout" element={<Checkout />} />
                 <Route
-                  path="adminDashboard"
+                  path="/adminDashboard"
                   element={
                     <MainLayout>
                       <AdminDashboard />
                     </MainLayout>
                   }
                 />
-
                 <Route
                   path="*"
                   element={
