@@ -1,17 +1,15 @@
 import db from '../config/db.js';
 
-export const createOrder = (order) => {
-  return db.query('INSERT INTO orders SET ?', [order]);
-};
-
+// Fetch all orders (rows only)
 export const getAllOrdersFromDB = () => {
-  return db.query('SELECT * FROM orders ORDER BY timestamp DESC');
+  return db.execute(
+    'SELECT * FROM orders ORDER BY timestamp DESC'
+  );
 };
 
-export const getOrderById = (id) => {
-  return db.query('SELECT * FROM orders WHERE id = ?', [id]);
-};
+// (you can add the other model methods here if you need them later)
+export const getOrderById = (id) =>
+  db.execute('SELECT * FROM orders WHERE id = ?', [id]);
 
-export const deleteOrder = (id) => {
-  return db.query('DELETE FROM orders WHERE id = ?', [id]);
-};
+export const deleteOrder = (id) =>
+  db.execute('DELETE FROM orders WHERE id = ?', [id]);

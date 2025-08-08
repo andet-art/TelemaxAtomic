@@ -358,132 +358,158 @@ setSalesData(computeSalesData(normalizedOrders));
   if (error) return <div className="p-6 text-center text-red-600">Error: {error}</div>;
 
   // Enhanced Overview Tab
-  const renderOverview = () => {
-    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-    const avgOrderValue = totalRevenue / orders.length;
-    
-    return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Dashboard Overview</h2>
-          <button
-            onClick={() => exportToCSV([
-              { metric: 'Total Users', value: users.length },
-              { metric: 'Total Products', value: products.length },
-              { metric: 'Total Orders', value: orders.length },
-              { metric: 'Total Revenue', value: totalRevenue.toFixed(2) }
-            ], 'overview_stats')}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700"
-          >
-            <Download size={16} />
-            Export Stats
-          </button>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-lg text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100">Total Users</p>
-                <span className="text-3xl font-bold">{users.length}</span>
-              </div>
-              <Users size={40} className="text-blue-200" />
+ const renderOverview = () => {
+  // First, coerce your totals (and any other numeric strings) into real numbers:
+  const numericOrders = orders.map(o => ({
+    ...o,
+    total: parseFloat(o.total),
+    subtotal: parseFloat(o.subtotal),
+    tax: parseFloat(o.tax),
+    shipping: parseFloat(o.shipping),
+  }))
+
+  // Now you can safely sum and average
+  const totalRevenue = numericOrders.reduce((sum, o) => sum + o.total, 0)
+  const avgOrderValue = numericOrders.length > 0
+    ? totalRevenue / numericOrders.length
+    : 0
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-6"
+    >
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Dashboard Overview</h2>
+        <button
+          onClick={() => exportToCSV([
+            { metric: 'Total Users',    value: users.length },
+            { metric: 'Total Products', value: products.length },
+            { metric: 'Total Orders',   value: orders.length },
+            { metric: 'Total Revenue',  value: totalRevenue.toFixed(2) }
+          ], 'overview_stats')}
+          className="bg-green-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-green-700"
+        >
+          <Download size={16} />
+          Export Stats
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-6 rounded-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-blue-100">Total Users</p>
+              <span className="text-3xl font-bold">{users.length}</span>
             </div>
-          </div>
-          
-          <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-lg text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100">Products</p>
-                <span className="text-3xl font-bold">{products.length}</span>
-              </div>
-              <Package size={40} className="text-green-200" />
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-lg text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-100">Orders</p>
-                <span className="text-3xl font-bold">{orders.length}</span>
-              </div>
-              <BarChart3 size={40} className="text-purple-200" />
-            </div>
-          </div>
-          
-          <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 rounded-lg text-white">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-orange-100">Revenue</p>
-                <span className="text-2xl font-bold">{totalRevenue.toFixed(0)} den</span>
-                <p className="text-xs text-orange-200">Avg: {avgOrderValue.toFixed(0)} den</p>
-              </div>
-              <DollarSign size={40} className="text-orange-200" />
-            </div>
+            <Users size={40} className="text-blue-200" />
           </div>
         </div>
 
-        {/* Top Performers */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold">Top Products</h3>
-              <button
-                onClick={() => exportToCSV(topProducts, 'top_products')}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                <Download size={16} />
-              </button>
+        <div className="bg-gradient-to-r from-green-500 to-green-600 p-6 rounded-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100">Products</p>
+              <span className="text-3xl font-bold">{products.length}</span>
             </div>
-            <div className="space-y-3">
-              {topProducts.map((product, index) => (
-                <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center justify-center font-semibold">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <p className="font-medium">{product.name}</p>
-                      <p className="text-sm text-gray-600">{product.soldQuantity} sold</p>
-                    </div>
-                  </div>
-                  <span className="font-bold text-green-600">{product.revenue?.toFixed(0)} den</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold">Top Customers</h3>
-              <button
-                onClick={() => exportToCSV(topCustomers, 'top_customers')}
-                className="text-blue-600 hover:text-blue-800"
-              >
-                <Download size={16} />
-              </button>
-            </div>
-            <div className="space-y-3">
-              {topCustomers.map((user, index) => (
-                <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
-                  <div className="flex items-center gap-3">
-                    <span className="w-6 h-6 bg-purple-100 text-purple-800 rounded-full text-sm flex items-center justify-center font-semibold">
-                      {index + 1}
-                    </span>
-                    <div>
-                      <p className="font-medium">{user.name}</p>
-                      <p className="text-sm text-gray-600">{user.orderCount} orders</p>
-                    </div>
-                  </div>
-                  <span className="font-bold text-purple-600">{user.totalSpent?.toFixed(0)} den</span>
-                </div>
-              ))}
-            </div>
+            <Package size={40} className="text-green-200" />
           </div>
         </div>
-      </motion.div>
-    );
-  };
+
+        <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-6 rounded-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-purple-100">Orders</p>
+              <span className="text-3xl font-bold">{orders.length}</span>
+            </div>
+            <BarChart3 size={40} className="text-purple-200" />
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-orange-500 to-orange-600 p-6 rounded-lg text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-orange-100">Revenue</p>
+              <span className="text-2xl font-bold">
+                {totalRevenue.toFixed(0)} den
+              </span>
+              <p className="text-xs text-orange-200">
+                Avg: {avgOrderValue.toFixed(0)} den
+              </p>
+            </div>
+            <DollarSign size={40} className="text-orange-200" />
+          </div>
+        </div>
+      </div>
+
+      {/* Top Products */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Top Products</h3>
+            <button
+              onClick={() => exportToCSV(topProducts, 'top_products')}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              <Download size={16} />
+            </button>
+          </div>
+          <div className="space-y-3">
+            {topProducts.map((product, index) => (
+              <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <div className="flex items-center gap-3">
+                  <span className="w-6 h-6 bg-blue-100 text-blue-800 rounded-full text-sm flex items-center justify-center font-semibold">
+                    {index + 1}
+                  </span>
+                  <div>
+                    <p className="font-medium">{product.name}</p>
+                    <p className="text-sm text-gray-600">{product.soldQuantity} sold</p>
+                  </div>
+                </div>
+                <span className="font-bold text-green-600">
+                  {product.revenue?.toFixed(0)} den
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Top Customers */}
+        <div className="bg-white p-6 rounded-lg shadow">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-xl font-semibold">Top Customers</h3>
+            <button
+              onClick={() => exportToCSV(topCustomers, 'top_customers')}
+              className="text-blue-600 hover:text-blue-800"
+            >
+              <Download size={16} />
+            </button>
+          </div>
+          <div className="space-y-3">
+            {topCustomers.map((user, index) => (
+              <div key={user.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                <div className="flex items-center gap-3">
+                  <span className="w-6 h-6 bg-purple-100 text-purple-800 rounded-full text-sm flex items-center justify-center font-semibold">
+                    {index + 1}
+                  </span>
+                  <div>
+                    <p className="font-medium">{user.name}</p>
+                    <p className="text-sm text-gray-600">{user.orderCount} orders</p>
+                  </div>
+                </div>
+                <span className="font-bold text-purple-600">
+                  {user.totalSpent?.toFixed(0)} den
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
 
   // Enhanced Products Tab
   const renderProducts = () => (
