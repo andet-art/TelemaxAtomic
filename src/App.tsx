@@ -37,11 +37,11 @@ function App() {
           <LanguageProvider>
             <AuthProvider>
               <Routes>
-                {/* auth pages: no navbar */}
+                {/* Auth pages: no navbar */}
                 <Route path="/signin" element={<SignIn />} />
                 <Route path="/join"   element={<Join />} />
 
-                {/* all other pages: wrapped in MainLayout (with Navbar) */}
+                {/* All other normal pages: wrapped in MainLayout */}
                 <Route
                   path="/"
                   element={
@@ -91,15 +91,11 @@ function App() {
                   }
                 />
                 <Route path="/checkout" element={<Checkout />} />
-                <Route
-                  path="adminDashboard"
-                  element={
-                    <MainLayout>
-                      <AdminDashboard />
-                    </MainLayout>
-                  }
-                />
 
+                {/* Admin dashboard: no MainLayout, no navbar */}
+                <Route path="/adminDashboard" element={<AdminDashboard />} />
+
+                {/* 404 fallback */}
                 <Route
                   path="*"
                   element={
