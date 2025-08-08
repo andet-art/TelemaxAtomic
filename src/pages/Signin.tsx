@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { Eye, EyeOff, LogIn, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext'; // ✅ Import context
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+
+// Set the global base URL for all axios requests
+axios.defaults.baseURL = import.meta.env.VITE_API_URL;
 
 const Signin: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth(); // ✅ Use context
+  const { login } = useAuth();
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -16,26 +19,20 @@ const Signin: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Signin attempt', { email, password });
     setError('');
     setLoading(true);
 
     try {
-      const base = import.meta.env.VITE_API_URL;
-      const res = await axios.post(
-        `${base}/api/users/signin`,
-        { email, password },
-        { headers: { 'Content-Type': 'application/json' } }
-      );
+      const res = await axios.post('/api/users/signin', { email, password });
+      console.log('Signin response', res);
 
-      // ✅ Save token & user object to localStorage
       localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data.user)); // ✅ Properly store user
-      login(res.data.user); // ✅ Pass user to context
-
-      // ✅ Redirect to profile
+      localStorage.setItem('user', JSON.stringify(res.data.user));
+      login(res.data.user);
       navigate('/profile');
-
     } catch (err: any) {
+      console.error('Signin error', err);
       const msg =
         err.response?.data?.message ||
         'Login failed. Please check your credentials and try again.';
@@ -61,7 +58,6 @@ const Signin: React.FC = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Email Address
@@ -77,7 +73,6 @@ const Signin: React.FC = () => {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm font-medium mb-1">
                 Password
@@ -103,7 +98,6 @@ const Signin: React.FC = () => {
               </div>
             </div>
 
-            {/* Remember & Forgot */}
             <div className="flex items-center justify-between">
               <label className="flex items-center gap-2 text-sm">
                 <input
@@ -112,15 +106,13 @@ const Signin: React.FC = () => {
                 />
                 Remember me
               </label>
-              <a href="/forgot-password" className="text-sm text-primary hover:underline">
+              <Link to="/forgot-password" className="text-sm text-primary hover:underline">
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
-            {/* Error */}
             {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
 
-            {/* Submit */}
             <Button
               type="submit"
               className="w-full py-3 text-lg luxury-gradient font-bold"
@@ -130,12 +122,11 @@ const Signin: React.FC = () => {
               <LogIn className="w-5 h-5 ml-2" />
             </Button>
 
-            {/* Signup link */}
             <div className="text-center text-sm text-muted-foreground">
               Don’t have an account?{' '}
-              <a href="/signup" className="text-primary hover:underline">
+              <Link to="/join" className="text-primary hover:underline">
                 Create one
-              </a>
+              </Link>
             </div>
           </form>
         </div>
