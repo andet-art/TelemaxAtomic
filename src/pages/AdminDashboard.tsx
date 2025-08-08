@@ -1,132 +1,157 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { motion } from 'framer-motion';
-import { Eye, Trash2, User, Package, ClipboardList, BarChart } from 'lucide-react';
+import Overview from '../components/admin/Overview';
+import Sales from '../components/admin/Sales';
+import Users from '../components/admin/Users';
+import Products from '../components/admin/Products';
+import Orders from '../components/admin/Orders';
+import {
+  BarChart3 as OverviewIcon,
+  TrendingUp as SalesIcon,
+  Users as UsersIcon,
+  Package as ProductsIcon,
+  DollarSign as OrdersIcon
+} from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+import { UserType, ProductType, OrderType, SalesData } from '../types/admin';
+
+const API_BASE = import.meta.env.VITE_API_URL;
 
 const AdminDashboard: React.FC = () => {
-  const [tab, setTab] = useState<'overview' | 'users' | 'products' | 'orders'>('overview');
-  const [users, setUsers] = useState([]);
-  const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
+  const [tab, setTab] = useState<'overview' | 'sales' | 'users' | 'products' | 'orders'>('overview');
+  const [users, setUsers] = useState<UserType[]>([]);
+  const [products, setProducts] = useState<ProductType[]>([]);
+  const [orders, setOrders] = useState<OrderType[]>([]);
+  const [salesData, setSalesData] = useState<SalesData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    async function load() {
+      setLoading(true);
       try {
-        const [u, p, o] = await Promise.all([
-          axios.get(`${API_BASE}/api/users`),
-          axios.get(`${API_BASE}/api/products`),
-          axios.get(`${API_BASE}/api/orders`)
+        const [uRes, pRes, oRes] = await Promise.all([
+          fetch(`${API_BASE}/api/users`),
+          fetch(`${API_BASE}/api/products`),
+          fetch(`${API_BASE}/api/orders`)
         ]);
-        setUsers(u.data);
-        setProducts(p.data);
-        setOrders(o.data);
-      } catch (err) {
-        console.error('Error fetching admin data:', err);
+
+        if (!uRes.ok || !pRes.ok || !oRes.ok) {
+          throw new Error('One of the API calls failed');
+        }
+
+        const [uJson, pJson, oJson] = await Promise.all([
+          uRes.json(),
+          pRes.json(),
+          oRes.json()
+        ]);
+
+        setUsers(uJson);
+        setProducts(pJson);
+
+        const norm = (oJson as any[]).map(o => ({
+          id: o.id ?? 0,
+          full_name: o.full_name ?? '',
+          payment_method: o.payment_method ?? '',
+          total: o.total ?? 0,
+          timestamp: o.timestamp ?? o.created_at ?? '',
+          items: o.items ?? []
+        }));
+
+        setOrders(norm);
+
+        // Group sales by date for accurate totals
+        const groupedSales = norm.reduce((acc, order) => {
+          const date = order.timestamp.split('T')[0];
+          if (!acc[date]) {
+            acc[date] = { revenue: 0, orders: 0 };
+          }
+          acc[date].revenue += Number(order.total);
+          acc[date].orders += 1;
+          return acc;
+        }, {} as Record<string, { revenue: number; orders: number }>);
+
+        setSalesData(
+          Object.entries(groupedSales).map(([date, { revenue, orders }]) => ({
+            date,
+            revenue,
+            orders,
+            avgOrderValue: revenue / orders
+          }))
+        );
+
+      } catch (e: any) {
+        console.error(e);
+        setError(e.message);
+      } finally {
+        setLoading(false);
       }
-    };
-    fetchData();
+    }
+
+    load();
   }, []);
 
-  const tabs = [
-    { key: 'overview', label: 'Overview', icon: BarChart },
-    { key: 'users', label: 'Users', icon: User },
-    { key: 'products', label: 'Products', icon: Package },
-    { key: 'orders', label: 'Orders', icon: ClipboardList }
-  ];
+  const exportToCSV = (data: any[], filename: string) => {
+    if (!data.length) return;
+    const headers = Object.keys(data[0]).join(',');
+    const rows = data.map(r =>
+      Object.values(r).map(v => `"${v}"`).join(',')
+    );
+    const csv = [headers, ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename + '.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
-  const renderOverview = () => (
-    <motion.div
-      key="overview"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className="space-y-6"
-    >
-      <h2 className="text-xl font-semibold">Dashboard Overview</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-card p-4 rounded-lg shadow text-center">
-          <p className="text-muted-foreground">Users</p>
-          <h2 className="text-2xl font-bold">{users.length}</h2>
-        </div>
-        <div className="bg-card p-4 rounded-lg shadow text-center">
-          <p className="text-muted-foreground">Products</p>
-          <h2 className="text-2xl font-bold">{products.length}</h2>
-        </div>
-        <div className="bg-card p-4 rounded-lg shadow text-center">
-          <p className="text-muted-foreground">Orders</p>
-          <h2 className="text-2xl font-bold">{orders.length}</h2>
-        </div>
-        <div className="bg-card p-4 rounded-lg shadow text-center">
-          <p className="text-muted-foreground">Revenue</p>
-          <h2 className="text-2xl font-bold">
-            {orders.reduce((sum, o: any) => sum + (parseFloat(o.total) || 0), 0).toFixed(2)} den
-          </h2>
-        </div>
-      </div>
-    </motion.div>
-  );
+  if (loading) return <div className="p-6 text-center">Loading...</div>;
+  if (error) return <div className="p-6 text-center text-red-600">Error: {error}</div>;
 
-  const renderUsers = () => (
-    <motion.div key="users" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <h2 className="text-xl font-semibold mb-4">All Users</h2>
-      <div className="space-y-2">
-        {users.map((u: any) => (
-          <div key={u.id} className="bg-muted p-4 rounded-lg flex justify-between items-center">
-            <div>
-              <p className="font-medium">{u.full_name || u.email}</p>
-              <p className="text-xs text-muted-foreground">{u.email}</p>
-            </div>
-            <button className="text-destructive"><Trash2 size={18} /></button>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-
-  const renderProducts = () => (
-    <motion.div key="products" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <h2 className="text-xl font-semibold mb-4">All Products</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {products.map((p: any) => (
-          <div key={p.id} className="bg-card p-4 rounded-lg shadow">
-            <p className="font-semibold text-lg">{p.name}</p>
-            <p className="text-muted-foreground text-sm">{p.description}</p>
-            <p className="text-green-600 font-bold mt-2">{p.price} den</p>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
-
-  const renderOrders = () => (
-    <motion.div key="orders" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-      <h2 className="text-xl font-semibold mb-4">All Orders</h2>
-      <div className="space-y-2">
-        {orders.map((o: any) => (
-          <div key={o.id} className="bg-muted p-4 rounded-lg">
-            <p><strong>Order #{o.id}</strong> — {o.total} den</p>
-            <p className="text-sm text-muted-foreground">{o.full_name} · {o.payment_method} · {new Date(o.timestamp).toLocaleString()}</p>
-          </div>
-        ))}
-      </div>
-    </motion.div>
-  );
+  const renderTab = () => {
+    switch (tab) {
+      case 'overview':
+        return (
+          <Overview
+            users={users}
+            products={products}
+            orders={orders}
+            topUsers={[...users].sort((a, b) => (b.totalSpent || 0) - (a.totalSpent || 0)).slice(0, 5)}
+            topProducts={[...products].sort((a, b) => (b.revenue || 0) - (a.revenue || 0)).slice(0, 5)}
+            exportToCSV={exportToCSV}
+          />
+        );
+      case 'sales':
+        return <Sales data={salesData} exportToCSV={exportToCSV} />;
+      case 'users':
+        return <Users users={users} exportToCSV={exportToCSV} />;
+      case 'products':
+        return <Products products={products} exportToCSV={exportToCSV} />;
+      case 'orders':
+        return <Orders orders={orders} exportToCSV={exportToCSV} />;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pt-24 px-6 md:px-12">
-      <h1 className="text-3xl font-bold mb-6 text-center">Admin Dashboard</h1>
+    <div className="min-h-screen bg-gray-100 p-6">
+      {/* No navbar here — just the page title */}
+      <h1 className="text-4xl font-bold mb-6">Admin Dashboard</h1>
 
-      <div className="flex justify-center flex-wrap gap-4 mb-10">
-        {tabs.map(({ key, label, icon: Icon }) => (
+      {/* Tab buttons */}
+      <div className="flex gap-2 mb-6">
+        {[
+          { key: 'overview', label: 'Overview', icon: OverviewIcon },
+          { key: 'sales', label: 'Sales', icon: SalesIcon },
+          { key: 'users', label: 'Users', icon: UsersIcon },
+          { key: 'products', label: 'Products', icon: ProductsIcon },
+          { key: 'orders', label: 'Orders', icon: OrdersIcon }
+        ].map(({ key, label, icon: Icon }) => (
           <button
             key={key}
-            onClick={() => setTab(key)}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all ${
-              tab === key
-                ? 'bg-primary text-primary-foreground shadow'
-                : 'bg-muted text-muted-foreground hover:bg-primary/10'
+            onClick={() => setTab(key as any)}
+            className={`flex items-center gap-1 px-3 py-2 rounded ${
+              tab === key ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-200'
             }`}
           >
             <Icon size={18} /> {label}
@@ -134,12 +159,7 @@ const AdminDashboard: React.FC = () => {
         ))}
       </div>
 
-      <div className="max-w-7xl mx-auto">
-        {tab === 'overview' && renderOverview()}
-        {tab === 'users' && renderUsers()}
-        {tab === 'products' && renderProducts()}
-        {tab === 'orders' && renderOrders()}
-      </div>
+      {renderTab()}
     </div>
   );
 };
