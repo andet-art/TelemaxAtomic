@@ -1,39 +1,40 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-interface LanguageContextType {
-  lang: 'en' | 'mk' | 'al';
-  toggleLanguage: () => void;
-  t: (key: string) => string;
-}
+type Lang = 'en' | 'mk' | 'al';
+type Translations = Record<string, Record<string, string>>;
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
-
-export const useLang = () => {
-  const context = useContext(LanguageContext);
-  if (!context) throw new Error('useLang must be used within a LanguageProvider');
-  return context;
+const translations: Translations = {
+  en: { home: 'Home', orders: 'Orders', contact: 'Contact', /* … */ },
+  mk: { home: 'Дома', orders: 'Нарачки', contact: 'Контакт', /* … */ },
+  al: { home: 'Shtëpia', orders: 'Porositë', contact: 'Kontakti', /* … */ },
 };
 
-export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [lang, setLang] = useState<'en' | 'mk' | 'al'>('en');
+interface LanguageContextValue {
+  lang: Lang;
+  t: (key: string) => string;
+  toggleLanguage: () => void;
+}
 
+const LanguageContext = createContext<LanguageContextValue>({
+  lang: 'en',
+  t: k => k,
+  toggleLanguage: () => {},
+});
+
+export const LanguageProvider = ({ children }: { children: ReactNode }) => {
+  const [lang, setLang] = useState<Lang>('en');
   const toggleLanguage = () => {
-    const languages: ('en' | 'mk' | 'al')[] = ['en', 'mk', 'al'];
-    const currentIndex = languages.indexOf(lang);
-    setLang(languages[(currentIndex + 1) % languages.length]);
+    const list: Lang[] = ['en','mk','al'];
+    const next = (list.indexOf(lang)+1) % list.length;
+    setLang(list[next]);
   };
-
-  const translations = {
-    en: { home: 'Home', about: 'About' },
-    mk: { home: 'Дома', about: 'За нас' },
-    al: { home: 'Shtëpia', about: 'Rreth nesh' },
-  };
-
-  const t = (key: string) => translations[lang][key as keyof typeof translations['en']] || key;
+  const t = (key: string) => translations[lang][key] || key;
 
   return (
-    <LanguageContext.Provider value={{ lang, toggleLanguage, t }}>
+    <LanguageContext.Provider value={{ lang, t, toggleLanguage }}>
       {children}
     </LanguageContext.Provider>
   );
 };
+
+export const useLang = () => useContext(LanguageContext);
