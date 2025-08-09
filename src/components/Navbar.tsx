@@ -2,7 +2,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
+import { useAuth } from "@/context/AuthContext";
 import {
   Menu,
   X,
@@ -44,11 +45,11 @@ const useLang = () => {
   const translations: Record<string, Record<string, string>> = {
     en: {
       home: 'Home',
-      orders: 'Orders', 
+      orders: 'Orders',
       contact: 'Contact',
       profile: 'Profile',
       signin: 'Sign In',
-      join: 'Join Premium',
+      join: 'Join',
       logout: 'Logout',
       cart: 'Cart',
       language: 'Language',
@@ -56,7 +57,7 @@ const useLang = () => {
     },
     mk: {
       home: 'Дома',
-      orders: 'Нарачки', 
+      orders: 'Нарачки',
       contact: 'Контакт',
       profile: 'Профил',
       signin: 'Најава',
@@ -68,7 +69,7 @@ const useLang = () => {
     },
     al: {
       home: 'Shtëpia',
-      orders: 'Porositë', 
+      orders: 'Porositë',
       contact: 'Kontakti',
       profile: 'Profili',
       signin: 'Hyr',
@@ -98,7 +99,7 @@ const useTheme = () => {
     setTheme(newTheme);
     if (typeof window !== 'undefined') {
       localStorage.setItem('telemax-theme', newTheme);
-      
+     
       // Apply theme to document
       const root = document.documentElement;
       if (newTheme === 'dark') {
@@ -125,19 +126,6 @@ const useTheme = () => {
   return { theme, setThemeMode };
 };
 
-// Auth hook (mock implementation)
-const useAuth = () => {
-  const [user, setUser] = useState(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  const logout = () => {
-    setUser(null);
-    setIsAuthenticated(false);
-  };
-
-  return { user, isAuthenticated, logout };
-};
-
 const themes = [
   { id: "light", label: "Light", icon: <Sun className="w-4 h-4" /> },
   { id: "dark", label: "Dark", icon: <Moon className="w-4 h-4" /> },
@@ -152,7 +140,7 @@ const languages = [
 
 // Floating orb component
 const FloatingOrb = ({ mousePosition }: { mousePosition: { x: number; y: number } }) => (
-  <div 
+  <div
     className="absolute pointer-events-none transition-all duration-[2500ms] ease-out opacity-6 hidden 2xl:block"
     style={{
       left: `${mousePosition.x}%`,
@@ -168,16 +156,16 @@ const FloatingOrb = ({ mousePosition }: { mousePosition: { x: number; y: number 
 const Navbar: React.FC = () => {
   const { lang, setLanguage, t } = useLang();
   const { theme, setThemeMode } = useTheme();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, logout } = useAuth(); // Using AuthContext
   const navigate = useNavigate();
   const location = useLocation();
-  
+ 
   const [menuOpen, setMenuOpen] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 50, y: 50 });
-  
+ 
   const navRef = useRef<HTMLElement>(null);
 
   // Navigation links
@@ -185,7 +173,7 @@ const Navbar: React.FC = () => {
     { to: '/', label: t('home'), icon: Home },
     { to: '/orders', label: t('orders'), icon: ShoppingBag },
     { to: '/contact', label: t('contact'), icon: MessageCircle },
-    ...(isAuthenticated ? [{ to: '/profile', label: t('profile'), icon: User }] : [])
+    ...(user ? [{ to: '/profile', label: t('profile'), icon: User }] : [])
   ];
 
   const activeIndex = links.findIndex(link => link.to === location.pathname);
@@ -195,7 +183,7 @@ const Navbar: React.FC = () => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
-    
+   
     const handleMouseMove = (e: MouseEvent) => {
       if (navRef.current) {
         const rect = navRef.current.getBoundingClientRect();
@@ -208,7 +196,7 @@ const Navbar: React.FC = () => {
 
     window.addEventListener("scroll", handleScroll, { passive: true });
     document.addEventListener('mousemove', handleMouseMove, { passive: true });
-    
+   
     return () => {
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener('mousemove', handleMouseMove);
@@ -237,7 +225,8 @@ const Navbar: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/signin');
+    navigate('/');
+    setMenuOpen(false);
   };
 
   const selectedTheme = themes.find(t => t.id === theme) || themes[2];
@@ -247,32 +236,29 @@ const Navbar: React.FC = () => {
     <>
       {/* Mobile backdrop */}
       {menuOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
           onClick={() => setMenuOpen(false)}
         />
       )}
-      
-      <nav 
+     
+      <nav
         ref={navRef}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
-          scrolled 
-            ? 'bg-background/95 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-border/50' 
+          scrolled
+            ? 'bg-background/95 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-border/50'
             : 'bg-background/80 backdrop-blur-md border-b border-border/20'
         }`}
       >
         {/* Top accent line */}
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary/60 to-transparent opacity-60" />
-        
+       
         {/* Floating orb effect */}
         <FloatingOrb mousePosition={mousePosition} />
-        
+       
         <div className="max-w-7xl mx-auto flex items-center justify-between px-6 sm:px-12 h-16">
           {/* Enhanced Logo */}
-          <div 
-            className="flex items-center gap-2 group cursor-pointer" 
-            onClick={() => navigateToPage('/')}
-          >
+          <Link to="/" className="flex items-center gap-2 group cursor-pointer">
             <div className="relative">
               <div className="bg-gradient-to-br from-amber-600 via-orange-700 to-red-800 rounded-xl w-8 h-8 flex items-center justify-center shadow-lg group-hover:shadow-amber-700/25 transition-all duration-700 group-hover:scale-110 group-hover:rotate-6">
                 <span className="text-white font-black text-base">T</span>
@@ -289,7 +275,7 @@ const Navbar: React.FC = () => {
                 Premium Collection
               </span>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Menu */}
           <ul className="hidden md:flex items-center gap-1 text-sm font-medium">
@@ -299,8 +285,8 @@ const Navbar: React.FC = () => {
                   onClick={() => navigateToPage(link.to)}
                   className={cn(
                     "group relative px-4 py-2 rounded-lg transition-all duration-300 hover:bg-primary/5 flex items-center gap-2",
-                    location.pathname === link.to 
-                      ? "text-foreground bg-primary/10" 
+                    location.pathname === link.to
+                      ? "text-foreground bg-primary/10"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                 >
@@ -319,8 +305,8 @@ const Navbar: React.FC = () => {
               <button
                 onClick={() => setThemeOpen(!themeOpen)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all duration-300 hover:scale-105 ${
-                  themeOpen 
-                    ? 'border-primary/60 bg-primary/10 text-primary shadow-lg shadow-primary/20' 
+                  themeOpen
+                    ? 'border-primary/60 bg-primary/10 text-primary shadow-lg shadow-primary/20'
                     : 'border-border/40 text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5'
                 }`}
               >
@@ -345,8 +331,8 @@ const Navbar: React.FC = () => {
                       }}
                       className={cn(
                         "flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 first:rounded-t-xl last:rounded-b-xl group animate-fade-in-up",
-                        theme === themeOption.id 
-                          ? "bg-primary/10 text-primary border-l-2 border-primary/60" 
+                        theme === themeOption.id
+                          ? "bg-primary/10 text-primary border-l-2 border-primary/60"
                           : "hover:bg-primary/5 text-foreground"
                       )}
                     >
@@ -365,8 +351,8 @@ const Navbar: React.FC = () => {
               <button
                 onClick={() => setLangOpen(!langOpen)}
                 className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-all duration-300 hover:scale-105 ${
-                  langOpen 
-                    ? 'border-primary/60 bg-primary/10 text-primary shadow-lg shadow-primary/20' 
+                  langOpen
+                    ? 'border-primary/60 bg-primary/10 text-primary shadow-lg shadow-primary/20'
                     : 'border-border/40 text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5'
                 }`}
               >
@@ -390,8 +376,8 @@ const Navbar: React.FC = () => {
                       }}
                       className={cn(
                         "flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 first:rounded-t-xl last:rounded-b-xl group animate-fade-in-up",
-                        lang === language.id 
-                          ? "bg-primary/10 text-primary border-l-2 border-primary/60" 
+                        lang === language.id
+                          ? "bg-primary/10 text-primary border-l-2 border-primary/60"
                           : "hover:bg-primary/5 text-foreground"
                       )}
                     >
@@ -428,34 +414,54 @@ const Navbar: React.FC = () => {
               <span className="ml-1 px-1.5 py-0.5 bg-primary text-primary-foreground text-xs rounded-full">2</span>
             </Button>
 
-            {isAuthenticated ? (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleLogout}
-                className="rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 transition-all duration-300 hover:scale-105"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                {t('logout')}
-              </Button>
+            {user ? (
+              <div className="flex items-center gap-3">
+                {/* Profile Link with Avatar */}
+                <Link to="/profile" className="flex items-center gap-2 group">
+                  <img
+                    src={user.avatar || "/default-avatar.png"}
+                    alt="Profile"
+                    className="w-10 h-10 rounded-full border-2 border-primary/20 group-hover:border-primary/60 transition-all duration-300 group-hover:scale-105"
+                  />
+                  <span className="font-medium text-foreground group-hover:text-primary transition-colors duration-300">
+                    {user.name || "User"}
+                  </span>
+                </Link>
+               
+                {/* Logout button */}
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleLogout}
+                  className="rounded-full text-muted-foreground hover:text-red-500 hover:bg-red-500/10 hover:border-red-500/40 transition-all duration-300 hover:scale-105"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  {t('logout')}
+                </Button>
+              </div>
             ) : (
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={() => navigateToPage('/signin')}
-                className="rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 hover:scale-105"
-              >
-                <User className="w-4 h-4 mr-2" />
-                {t('signin')}
-              </Button>
+              <div className="flex items-center gap-3">
+                <Link to="/signin">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300 hover:scale-105"
+                  >
+                    <User className="w-4 h-4 mr-2" />
+                    {t('signin')}
+                  </Button>
+                </Link>
+               
+                <Link to="/join">
+                  <Button
+                    size="sm"
+                    className="luxury-gradient rounded-full px-6 py-2 text-sm font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
+                  >
+                    {t('join')}
+                  </Button>
+                </Link>
+              </div>
             )}
-
-            <Button
-              size="sm"
-              className="luxury-gradient rounded-full px-6 py-2 text-sm font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-105 hover:-translate-y-0.5"
-            >
-              {t('join')}
-            </Button>
           </div>
 
           {/* Enhanced Mobile Hamburger */}
@@ -489,8 +495,8 @@ const Navbar: React.FC = () => {
                       onClick={() => navigateToPage(link.to)}
                       className={cn(
                         "group flex items-center gap-3 p-3 rounded-xl transition-all duration-300 w-full text-left",
-                        location.pathname === link.to 
-                          ? "text-foreground bg-primary/10" 
+                        location.pathname === link.to
+                          ? "text-foreground bg-primary/10"
                           : "text-muted-foreground hover:text-foreground hover:bg-primary/5"
                       )}
                     >
@@ -508,8 +514,8 @@ const Navbar: React.FC = () => {
                   <button
                     onClick={() => setThemeOpen(!themeOpen)}
                     className={`flex items-center gap-3 w-full p-3 rounded-xl border transition-all duration-300 ${
-                      themeOpen 
-                        ? 'border-primary/60 bg-primary/10 text-primary' 
+                      themeOpen
+                        ? 'border-primary/60 bg-primary/10 text-primary'
                         : 'border-border/40 text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5'
                     }`}
                   >
@@ -531,8 +537,8 @@ const Navbar: React.FC = () => {
                           }}
                           className={cn(
                             "flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 first:rounded-t-xl last:rounded-b-xl animate-fade-in-up",
-                            theme === themeOption.id 
-                              ? "bg-primary/10 text-primary border-l-2 border-primary/60" 
+                            theme === themeOption.id
+                              ? "bg-primary/10 text-primary border-l-2 border-primary/60"
                               : "hover:bg-primary/5"
                           )}
                         >
@@ -549,8 +555,8 @@ const Navbar: React.FC = () => {
                   <button
                     onClick={() => setLangOpen(!langOpen)}
                     className={`flex items-center gap-3 w-full p-3 rounded-xl border transition-all duration-300 ${
-                      langOpen 
-                        ? 'border-primary/60 bg-primary/10 text-primary' 
+                      langOpen
+                        ? 'border-primary/60 bg-primary/10 text-primary'
                         : 'border-border/40 text-muted-foreground hover:border-primary/40 hover:text-primary hover:bg-primary/5'
                     }`}
                   >
@@ -571,8 +577,8 @@ const Navbar: React.FC = () => {
                           }}
                           className={cn(
                             "flex items-center gap-3 px-4 py-3 cursor-pointer transition-all duration-200 first:rounded-t-xl last:rounded-b-xl animate-fade-in-up",
-                            lang === language.id 
-                              ? "bg-primary/10 text-primary border-l-2 border-primary/60" 
+                            lang === language.id
+                              ? "bg-primary/10 text-primary border-l-2 border-primary/60"
                               : "hover:bg-primary/5"
                           )}
                         >
@@ -596,136 +602,63 @@ const Navbar: React.FC = () => {
                     <span className="ml-auto px-2 py-1 bg-primary text-primary-foreground text-xs rounded-full">2</span>
                   </Button>
 
-                  {isAuthenticated ? (
-                    <Button
-                      size="lg"
-                      variant="ghost"
-                      onClick={handleLogout}
-                      className="w-full flex justify-center gap-2 rounded-xl text-red-500 hover:text-red-600 hover:bg-red-500/10 transition-all duration-300"
-                    >
-                      <LogOut className="w-5 h-5" />
-                      {t('logout')}
-                    </Button>
+                  {user ? (
+                    <>
+                      {/* Mobile Profile Section */}
+                      <Link to="/profile" className="flex items-center gap-3 p-3 rounded-xl border border-border/40 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300">
+                        <img
+                          src={user.avatar || "/default-avatar.png"}
+                          alt="Profile"
+                          className="w-8 h-8 rounded-full border-2 border-primary/20"
+                        />
+                        <div className="flex flex-col">
+                          <span className="font-medium text-foreground">{user.name || "User"}</span>
+                          <span className="text-sm text-muted-foreground">{t('profile')}</span>
+                        </div>
+                        <User className="w-5 h-5 ml-auto text-muted-foreground" />
+                      </Link>
+                     
+                      {/* Mobile Logout button */}
+                      <Button
+                        size="lg"
+                        variant="outline"
+                        onClick={handleLogout}
+                        className="w-full flex justify-center gap-2 rounded-xl text-red-500 border-red-500/30 hover:bg-red-500/10 hover:border-red-500/60 transition-all duration-300"
+                      >
+                        <LogOut className="w-5 h-5" />
+                        <span className="font-medium">{t('logout')}</span>
+                      </Button>
+                    </>
                   ) : (
-                    <Button
-                      size="lg"
-                      variant="ghost"
-                      onClick={() => navigateToPage('/signin')}
-                      className="w-full flex justify-center gap-2 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300"
-                    >
-                      <User className="w-5 h-5" />
-                      {t('signin')}
-                    </Button>
+                    <>
+                      {/* Mobile Auth buttons */}
+                      <Link to="/signin">
+                        <Button
+                          size="lg"
+                          variant="outline"
+                          className="w-full flex justify-center gap-2 rounded-xl text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all duration-300"
+                        >
+                          <User className="w-5 h-5" />
+                          <span className="font-medium">{t('signin')}</span>
+                        </Button>
+                      </Link>
+                     
+                      <Link to="/join">
+                        <Button
+                          size="lg"
+                          className="w-full luxury-gradient rounded-xl text-white font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 transition-all duration-300 hover:scale-[1.02]"
+                        >
+                          {t('join')}
+                        </Button>
+                      </Link>
+                    </>
                   )}
-
-                  <Button
-                    size="lg"
-                    className="w-full luxury-gradient flex justify-center rounded-xl px-6 py-3 font-semibold shadow-lg transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5"
-                  >
-                    {t('join')}
-                  </Button>
                 </div>
               </ul>
             </div>
           </div>
         )}
       </nav>
-
-      {/* Add required CSS for animations */}
-      <style jsx>{`
-        @keyframes gradient-x {
-          0%, 100% {
-            background-size: 200% 200%;
-            background-position: left center;
-          }
-          50% {
-            background-size: 200% 200%;
-            background-position: right center;
-          }
-        }
-
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slide-up {
-          from { opacity: 0; transform: translateY(-10px) scale(0.95); }
-          to { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        @keyframes slide-down {
-          from { opacity: 0; transform: translateY(-10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes float {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(180deg); }
-        }
-
-        @keyframes float-delayed {
-          0%, 100% { transform: translateY(0px) rotate(0deg); }
-          50% { transform: translateY(-15px) rotate(-180deg); }
-        }
-
-        @keyframes shimmer {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
-        }
-
-        .animate-gradient-x {
-          animation: gradient-x 3s ease infinite;
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.6s ease forwards;
-          opacity: 0;
-        }
-
-        .animate-fade-in-up {
-          animation: fade-in-up 0.4s ease forwards;
-          opacity: 0;
-        }
-
-        .animate-slide-up {
-          animation: slide-up 0.3s ease forwards;
-        }
-
-        .animate-slide-down {
-          animation: slide-down 0.3s ease forwards;
-        }
-
-        .animate-float {
-          animation: float 6s ease-in-out infinite;
-        }
-
-        .animate-float-delayed {
-          animation: float-delayed 8s ease-in-out infinite;
-        }
-
-        .animate-shimmer {
-          animation: shimmer 2s infinite;
-        }
-
-        /* Custom luxury gradient */
-        .luxury-gradient {
-          background: linear-gradient(135deg, #d97706 0%, #ea580c 50%, #dc2626 100%);
-          background-size: 200% 200%;
-          animation: gradient-x 3s ease infinite;
-        }
-
-        /* Custom utilities for better theme compatibility */
-        .dark .luxury-gradient {
-          background: linear-gradient(135deg, #f59e0b 0%, #f97316 50%, #ef4444 100%);
-          background-size: 200% 200%;
-        }
-      `}</style>
     </>
   );
 };
